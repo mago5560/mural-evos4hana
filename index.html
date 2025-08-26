@@ -7,31 +7,74 @@
   </head>
   <body>
     <a-scene>
-      <!-- Cámara con cursor (para móviles toca la pantalla) -->
-      <a-entity camera look-controls position="0 1.6 3">
+      <!-- Cámara con cursor -->
+      <a-entity camera look-controls position="0 1.6 6">
         <a-cursor></a-cursor>
       </a-entity>
 
-      <!-- Luz -->
+      <!-- Luces -->
       <a-entity light="type: directional; intensity: 0.8" position="2 4 5"></a-entity>
       <a-entity light="type: ambient; intensity: 0.5"></a-entity>
 
-      <!-- Módulo Finanzas -->
-      <a-box id="finanzas" position="-2 1 -3" color="#4CC3D9"></a-box>
-      <a-text value="Finanzas" position="-2 2 -3" align="center"></a-text>
+      <!-- Fondo 360 -->
+      <!-- 🔹 Aquí puedes cambiar la imagen por cualquier panorama (ejemplo: sala, oficina, ciudad, etc.) -->
+      <a-sky src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg"></a-sky>
 
-      <!-- Módulo Ventas -->
-      <a-box id="ventas" position="0 1 -3" color="#EF2D5E"></a-box>
-      <a-text value="Ventas" position="0 2 -3" align="center"></a-text>
+      <!-- Assets: Íconos -->
+      <a-assets>
+        <img id="fi-icon" src="https://cdn-icons-png.flaticon.com/512/1170/1170576.png">
+        <img id="sd-icon" src="https://cdn-icons-png.flaticon.com/512/2331/2331970.png">
+        <img id="pp-icon" src="https://cdn-icons-png.flaticon.com/512/847/847969.png">
+        <img id="hcm-icon" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+        <img id="ewm-icon" src="https://cdn-icons-png.flaticon.com/512/1065/1065715.png">
+        <img id="mm-icon" src="https://cdn-icons-png.flaticon.com/512/679/679922.png">
+        <img id="co-icon" src="https://cdn-icons-png.flaticon.com/512/1170/1170581.png">
+        <img id="mm-m-icon" src="https://cdn-icons-png.flaticon.com/512/679/679720.png">
+        <img id="qm-icon" src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png">
+      </a-assets>
 
-      <!-- Módulo Compras -->
-      <a-box id="compras" position="2 1 -3" color="#7BC8A4"></a-box>
-      <a-text value="Compras" position="2 2 -3" align="center"></a-text>
+      <!-- Fila 1 -->
+      <a-plane id="FI" src="#fi-icon" position="-4 1 -4" width="1.5" height="1.5" 
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: -4 1.3 -4"></a-plane>
+      <a-text value="FI - Finanzas" position="-4 2.7 -4" align="center"></a-text>
 
-      <!-- Texto dinámico (aparece al tocar un módulo) -->
+      <a-plane id="SD" src="#sd-icon" position="-2 1 -4" width="1.5" height="1.5"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: -2 1.3 -4"></a-plane>
+      <a-text value="SD - Ventas" position="-2 2.7 -4" align="center"></a-text>
+
+      <a-plane id="PP" src="#pp-icon" position="0 1 -4" width="1.5" height="1.5"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: 0 1.3 -4"></a-plane>
+      <a-text value="PP - Producción" position="0 2.7 -4" align="center"></a-text>
+
+      <a-plane id="HCM" src="#hcm-icon" position="2 1 -4" width="1.5" height="1.5"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: 2 1.3 -4"></a-plane>
+      <a-text value="HCM - Planillas" position="2 2.7 -4" align="center"></a-text>
+
+      <a-plane id="EWM" src="#ewm-icon" position="4 1 -4" width="1.5" height="1.5"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: 4 1.3 -4"></a-plane>
+      <a-text value="EWM - Almacén" position="4 2.7 -4" align="center"></a-text>
+
+      <!-- Fila 2 -->
+      <a-plane id="MM" src="#mm-icon" position="-3 1 -7" width="1.5" height="1.5"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: -3 1.3 -7"></a-plane>
+      <a-text value="MM - Materiales" position="-3 2.7 -7" align="center"></a-text>
+
+      <a-plane id="CO" src="#co-icon" position="-1 1 -7" width="1.5" height="1.5"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: -1 1.3 -7"></a-plane>
+      <a-text value="CO - Costos" position="-1 2.7 -7" align="center"></a-text>
+
+      <a-plane id="MM_M" src="#mm-m-icon" position="1 1 -7" width="1.5" height="1.5"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: 1 1.3 -7"></a-plane>
+      <a-text value="MM - Mantenimiento" position="1 2.7 -7" align="center"></a-text>
+
+      <a-plane id="QM" src="#qm-icon" position="3 1 -7" width="1.5" height="1.5"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: 3 1.3 -7"></a-plane>
+      <a-text value="QM - Calidad" position="3 2.7 -7" align="center"></a-text>
+
+      <!-- Texto dinámico -->
       <a-entity id="infoBox" visible="false">
-        <a-plane position="0 1.5 -2" width="3" height="1.5" color="#FFF"></a-plane>
-        <a-text id="infoText" value="" position="0 1.5 -2.01" color="#000" align="center" width="2.8"></a-text>
+        <a-plane position="0 3 -3" width="6" height="2.5" color="#FFF" opacity="0.9"></a-plane>
+        <a-text id="infoText" value="" position="0 3 -3.01" color="#000" align="center" width="5.5"></a-text>
       </a-entity>
     </a-scene>
 
@@ -40,11 +83,17 @@
       const infoBox = document.querySelector("#infoBox");
       const infoText = document.querySelector("#infoText");
 
-      // Contenido de los módulos
+      // Contenido de los módulos SAP S/4HANA
       const modulos = {
-        "finanzas": "Gestión de contabilidad, reportes financieros y control de costos en tiempo real.",
-        "ventas": "Optimiza procesos de ventas, facturación y relación con clientes.",
-        "compras": "Gestión de proveedores, adquisiciones y control de inventarios."
+        "FI": "FI (Finanzas): Gestión contable, reportes financieros y control de costos en tiempo real.",
+        "SD": "SD (Ventas y Distribución): Administración de ventas, facturación, pedidos y relación con clientes.",
+        "PP": "PP (Producción): Planificación y control de producción. Aplica a fábrica, energía, campo y bioenergía.",
+        "HCM": "HCM (Gestión de Capital Humano): Administración de planillas, nóminas, horarios y talento humano.",
+        "EWM": "EWM (Extended Warehouse Management): Optimización de almacenamiento, logística y control de inventarios.",
+        "MM": "MM (Gestión de Materiales / Compras): Procesos de adquisición, compras y control de insumos.",
+        "CO": "CO (Control de Costos): Control de centros de costos, rentabilidad y análisis financiero.",
+        "MM_M": "MM - Mantenimiento: Gestión de mantenimiento preventivo y correctivo en fábrica y taller.",
+        "QM": "QM (Gestión de Calidad): Control de calidad en procesos, inspecciones y pruebas de laboratorio."
       };
 
       // Eventos de clic
