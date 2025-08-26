@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Círculo con Octágonos Interactivos</title>
+    <title>Octágono en Realidad Aumentada</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
         body {
             margin: 0;
@@ -12,394 +13,233 @@
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
             height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: white;
-        }
-        
-        .header {
             text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px;
-            max-width: 800px;
-        }
-        
-        h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            margin-top: 10px;
-        }
-        
-        .instructions {
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            max-width: 600px;
-        }
-        
-        .info-panel {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            max-width: 500px;
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            font-family: Arial, sans-serif;
-            display: none;
-            z-index: 999;
-            color: #333;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: bold;
-            color: #888;
-            transition: color 0.3s;
-        }
-        
-        .close-btn:hover {
-            color: #333;
-        }
-        
-        #panel-title {
-            margin-top: 0;
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-        
-        #panel-description {
-            line-height: 1.6;
         }
         
         .container {
-            width: 100%;
-            height: 70vh;
+            max-width: 900px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            margin: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fdbb2d;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        .button {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button:hover {
+            background: #ffcc44;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .a-frame-scene {
+            width: 100%;
+            height: 400px;
+            border: 3px solid #fdbb2d;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+            margin: 20px 0;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        
+        .info-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 42, 108, 0.95);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            z-index: 100;
+            max-width: 80%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border: 2px solid #fdbb2d;
+            text-align: left;
+        }
+        
+        .info-panel h3 {
+            color: #fdbb2d;
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+        
+        .info-panel .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #fdbb2d;
+            color: #1a2a6c;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
         }
         
         .footer {
             margin-top: 20px;
-            text-align: center;
             font-size: 0.9rem;
-            opacity: 0.8;
+            color: rgba(255, 255, 255, 0.7);
         }
         
         @media (max-width: 768px) {
-            .header {
-                margin: 10px;
-                padding: 10px;
+            .container {
+                width: 95%;
+                padding: 15px;
             }
             
             h1 {
-                font-size: 1.8rem;
+                font-size: 2rem;
             }
             
-            .subtitle {
-                font-size: 1rem;
-            }
-            
-            .container {
-                height: 60vh;
+            .a-frame-scene {
+                height: 300px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Círculo con Octágonos Interactivos</h1>
-        <div class="subtitle">Haz clic en los octágonos para ver información detallada</div>
-    </div>
-    
-    <div class="instructions">
-        Haz clic o toca los octágonos para ver información detallada sobre cada tema.
-    </div>
-    
     <div class="container">
-        <a-scene embedded>
-            <!-- Cámara con posición fija -->
-            <a-entity position="0 0 5" rotation="0 0 0">
-                <a-camera></a-camera>
-            </a-entity>
-            
-            <!-- Luces -->
-            <a-entity light="type: ambient; color: #BBB"></a-entity>
-            <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
-            
-            <!-- Círculo central -->
-            <a-entity id="central-circle" geometry="primitive: cylinder; radius: 0.8; height: 0.1" 
-                     material="color: #3366CC; shader: flat" 
-                     position="0 0 -3"
-                     animation="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear">
-                <a-entity text="value: Centro; align: center; color: white; width: 5" 
-                         position="0 0.1 0" scale="2 2 2"></a-entity>
-            </a-entity>
-
-            <!-- Octágonos alrededor del círculo central -->
-            <a-entity id="octagon-container">
-                <!-- Los octágonos se generarán mediante JavaScript -->
-            </a-entity>
-            
-            <!-- Suelo -->
-            <a-plane position="0 -1.5 -3" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" opacity="0.4"></a-plane>
-        </a-scene>
+        <h1>Octágono en Realidad Aumentada</h1>
+        <h2>Con A-Frame y AR.js</h2>
+        
+        <p>Este ejemplo muestra un octágono en realidad aumentada que puedes visualizar a través de la cámara de tu dispositivo.</p>
+        
+        <div class="instructions">
+            <h3>Instrucciones:</h3>
+            <ol>
+                <li>Acepta los permisos de la cámara cuando se te solicite.</li>
+                <li>Busca una superficie plana y bien iluminada.</li>
+                <li>Acerca y aleja el marcador para ajustar el tamaño.</li>
+                <li>Haz clic en el octágono para ver información sobre esta figura geométrica.</li>
+            </ol>
+        </div>
+        
+        <button class="button" onclick="showInfo()">Ver información del octágono</button>
+        
+        <div class="a-frame-scene">
+            <!-- Escena de A-Frame -->
+            <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;' vr-mode-ui="enabled: false">
+                <!-- Marcador para realidad aumentada (patrón Hiro) -->
+                <a-marker type='pattern' url='https://raw.githack.com/AR-js-org/AR.js/master/aframe/data/data/patt.hiro'>
+                    <!-- Octágono 3D -->
+                    <a-entity id="octagon" geometry="primitive: cylinder; radius: 0.5; height: 0.1; segmentsRadial: 8" 
+                             material="color: #38A3A5; shader: flat" 
+                             position="0 0.05 0"
+                             animation="property: rotation; to: 0 360 0; loop: true; dur: 8000">
+                        <!-- Cara superior del octágono -->
+                        <a-entity geometry="primitive: circle; radius: 0.5; segments: 8" 
+                                 material="color: #38A3A5; shader: flat" 
+                                 position="0 0.051 0"
+                                 rotation="-90 0 0"></a-entity>
+                        <!-- Texto sobre el octágono -->
+                        <a-text value="Toca para info" align="center" position="0 0.2 0" color="#FFF" width="3"></a-text>
+                    </a-entity>
+                </a-marker>
+                
+                <!-- Cámara -->
+                <a-entity camera></a-entity>
+            </a-scene>
+        </div>
+        
+        <p class="footer">Nota: Para una mejor experiencia de RA, imprime el marcador Hiro y colócalo frente a la cámara.</p>
     </div>
     
-    <div id="info-panel" class="info-panel">
-        <span class="close-btn" onclick="closeInfo()">×</span>
-        <h2 id="panel-title">Título del Octágono</h2>
-        <p id="panel-description">Descripción del elemento seleccionado aparecerá aquí.</p>
-    </div>
-    
-    <div class="footer">
-        Proyecto de Visualización 3D con A-Frame | HTML5
+    <!-- Panel de información que aparecerá al hacer clic -->
+    <div id="infoPanel" class="info-panel">
+        <button class="close-btn" onclick="hideInfo()">X</button>
+        <h3>El Octágono</h3>
+        <p>Un octágono es un polígono de ocho lados y ocho ángulos. La palabra proviene del griego "oktá" (ocho) y "gonía" (ángulo).</p>
+        <p><strong>Características:</strong></p>
+        <ul>
+            <li>Tiene 8 lados y 8 vértices</li>
+            <li>La suma de sus ángulos internos es 1080°</li>
+            <li>Cada ángulo interno de un octágono regular mide 135°</li>
+            <li>Es la forma de muchas señales de tráfico como "PARE"</li>
+        </ul>
+        <p>En arquitectura, los octágonos se han utilizado desde la antigüedad para construir edificios, fuentes y cúpulas.</p>
     </div>
 
     <script>
-        // Datos para los octágonos
-        const octagonData = [
-            { 
-                id: 1, 
-                color: "#FF5733", 
-                title: "Tecnología A-Frame", 
-                description: "A-Frame es un framework web para crear experiencias de realidad virtual (VR) y aumentada (AR) utilizando HTML. Es de código abierto y fue desarrollado inicialmente por Mozilla." 
-            },
-            { 
-                id: 2, 
-                color: "#33FF57", 
-                title: "Visualización 3D", 
-                description: "La visualización 3D en web permite representar objetos tridimensionales directamente en el navegador, creando experiencias inmersivas e interactivas para los usuarios." 
-            },
-            { 
-                id: 3, 
-                color: "#3357FF", 
-                title: "WebGL", 
-                description: "WebGL es una API de JavaScript para renderizar gráficos 3D en cualquier navegador web compatible sin el uso de plug-ins, aprovechando la GPU del dispositivo." 
-            },
-            { 
-                id: 4, 
-                color: "#F3FF33", 
-                title: "Interacción Web", 
-                description: "Las tecnologías web modernas como HTML5, WebGL y WebXR permiten crear experiencias inmersivas e interactivas que funcionan en múltiples dispositivos y plataformas." 
-            },
-            { 
-                id: 5, 
-                color: "#FF33F3", 
-                title: "Animaciones Web", 
-                description: "Las animaciones en el navegador web pueden crearse usando CSS, JavaScript o APIs específicas como Web Animations API, mejorando la experiencia de usuario." 
-            },
-            { 
-                id: 6, 
-                color: "#33F3FF", 
-                title: "Desarrollo Frontend", 
-                description: "El desarrollo frontend se centra en la creación de interfaces de usuario atractivas y funcionales utilizando HTML, CSS y JavaScript." 
-            }
-        ];
-
-        // Radio del círculo donde se colocarán los octágonos
-        const circleRadius = 2.5;
+        // Obtener referencias a los elementos
+        const octagon = document.querySelector('#octagon');
+        const infoPanel = document.getElementById('infoPanel');
         
-        // Variable para almacenar el octágono actualmente seleccionado
-        let selectedOctagon = null;
-
-        // Generar los octágonos alrededor del círculo central
-        document.addEventListener("DOMContentLoaded", function() {
-            const container = document.getElementById("octagon-container");
-            const totalOctagons = octagonData.length;
-            
-            octagonData.forEach((data, index) => {
-                // Calcular posición en círculo
-                const angle = (index / totalOctagons) * Math.PI * 2;
-                const x = Math.cos(angle) * circleRadius;
-                const z = Math.sin(angle) * circleRadius - 3; // Ajustar para posición en escena
-                
-                // Crear elemento octágono
-                const octagon = document.createElement("a-entity");
-                octagon.setAttribute("geometry", {
-                    primitive: "cylinder",
-                    radius: 0.4,
-                    height: 0.2,
-                    segments: 8
-                });
-                octagon.setAttribute("material", {
-                    color: data.color,
-                    shader: "flat"
-                });
-                octagon.setAttribute("position", `${x} 0 ${z}`);
-                octagon.setAttribute("class", "octagon");
-                octagon.setAttribute("data-id", data.id);
-                
-                // Añadir animación de rotación continua
-                octagon.setAttribute("animation", {
-                    property: "rotation",
-                    to: `0 360 0`,
-                    loop: true,
-                    dur: 10000 + (index * 2000),
-                    easing: "linear"
-                });
-                
-                // Añadir texto encima de cada octágono
-                const text = document.createElement("a-entity");
-                text.setAttribute("text", {
-                    value: data.title.split(" ")[0],
-                    align: "center",
-                    color: "#FFFFFF",
-                    width: 3
-                });
-                text.setAttribute("position", `0 0.25 0`);
-                text.setAttribute("scale", "1.5 1.5 1.5");
-                
-                octagon.appendChild(text);
-                
-                // Hacer el octágono clickeable
-                octagon.setAttribute("clickable", "");
-                octagon.addEventListener("click", function() {
-                    selectOctagon(data.id);
-                });
-                
-                // Añadir efecto de hover
-                octagon.addEventListener("mouseenter", function() {
-                    octagon.setAttribute("animation__hover", {
-                        property: "scale",
-                        to: "1.2 1.2 1.2",
-                        dur: 300,
-                        easing: "easeOutQuad"
-                    });
-                });
-                
-                octagon.addEventListener("mouseleave", function() {
-                    if (selectedOctagon !== data.id) {
-                        octagon.setAttribute("animation__hover", {
-                            property: "scale",
-                            to: "1 1 1",
-                            dur: 300,
-                            easing: "easeOutQuad"
-                        });
-                    }
-                });
-                
-                container.appendChild(octagon);
-            });
+        // Agregar evento de clic al octágono
+        octagon.addEventListener('click', function() {
+            showInfo();
         });
-
-        // Función para seleccionar un octágono
-        function selectOctagon(id) {
-            // Restaurar posición y tamaño del octágono previamente seleccionado
-            if (selectedOctagon) {
-                const prevOctagon = document.querySelector(`.octagon[data-id="${selectedOctagon}"]`);
-                if (prevOctagon) {
-                    const angle = ((selectedOctagon - 1) / octagonData.length) * Math.PI * 2;
-                    const x = Math.cos(angle) * circleRadius;
-                    const z = Math.sin(angle) * circleRadius - 3;
-                    
-                    prevOctagon.setAttribute("animation", {
-                        property: "position",
-                        to: `${x} 0 ${z}`,
-                        dur: 800,
-                        easing: "easeOutQuad"
-                    });
-                    
-                    prevOctagon.setAttribute("animation__scale", {
-                        property: "scale",
-                        to: "1 1 1",
-                        dur: 800,
-                        easing: "easeOutQuad"
-                    });
-                }
-            }
-            
-            // Obtener datos del octágono seleccionado
-            const data = octagonData.find(item => item.id === id);
-            if (!data) return;
-            
-            // Mover el octágono seleccionado al frente
-            const octagon = document.querySelector(`.octagon[data-id="${id}"]`);
-            if (octagon) {
-                octagon.setAttribute("animation", {
-                    property: "position",
-                    to: "0 0 -1.5",
-                    dur: 800,
-                    easing: "easeOutQuad"
-                });
-                
-                octagon.setAttribute("animation__scale", {
-                    property: "scale",
-                    to: "1.5 1.5 1.5",
-                    dur: 800,
-                    easing: "easeOutQuad"
-                });
-            }
-            
-            // Mostrar panel de información
-            document.getElementById("panel-title").textContent = data.title;
-            document.getElementById("panel-description").textContent = data.description;
-            document.getElementById("info-panel").style.display = "block";
-            
-            // Actualizar octágono seleccionado
-            selectedOctagon = id;
-        }
-
-        // Función para cerrar el panel de información
-        function closeInfo() {
-            document.getElementById("info-panel").style.display = "none";
-            
-            // Restaurar el octágono a su posición original
-            if (selectedOctagon) {
-                const octagon = document.querySelector(`.octagon[data-id="${selectedOctagon}"]`);
-                if (octagon) {
-                    const angle = ((selectedOctagon - 1) / octagonData.length) * Math.PI * 2;
-                    const x = Math.cos(angle) * circleRadius;
-                    const z = Math.sin(angle) * circleRadius - 3;
-                    
-                    octagon.setAttribute("animation", {
-                        property: "position",
-                        to: `${x} 0 ${z}`,
-                        dur: 800,
-                        easing: "easeOutQuad"
-                    });
-                    
-                    octagon.setAttribute("animation__scale", {
-                        property: "scale",
-                        to: "1 1 1",
-                        dur: 800,
-                        easing: "easeOutQuad"
-                    });
-                }
-                
-                selectedOctagon = null;
-            }
+        
+        // Función para mostrar el panel de información
+        function showInfo() {
+            infoPanel.style.display = 'block';
         }
         
-        // Registrar componente clickable
-        AFRAME.registerComponent('clickable', {
-            init: function () {
-                this.el.addEventListener('click', this.onClick.bind(this));
-            },
-            onClick: function (evt) {
-                // El manejo del click se hace en los event listeners individuales
+        // Función para ocultar el panel de información
+        function hideInfo() {
+            infoPanel.style.display = 'none';
+        }
+        
+        // También cerrar al tocar fuera en dispositivos móviles
+        document.addEventListener('touchstart', function(e) {
+            if (infoPanel.style.display === 'block' && !infoPanel.contains(e.target)) {
+                hideInfo();
             }
         });
     </script>
