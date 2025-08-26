@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Módulos SAP S/4HANA</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- Cámara con cursor (para móviles toca la pantalla) -->
+      <a-entity camera look-controls position="0 1.6 3">
+        <a-cursor></a-cursor>
+      </a-entity>
+
+      <!-- Luz -->
+      <a-entity light="type: directional; intensity: 0.8" position="2 4 5"></a-entity>
+      <a-entity light="type: ambient; intensity: 0.5"></a-entity>
+
+      <!-- Módulo Finanzas -->
+      <a-box id="finanzas" position="-2 1 -3" color="#4CC3D9"></a-box>
+      <a-text value="Finanzas" position="-2 2 -3" align="center"></a-text>
+
+      <!-- Módulo Ventas -->
+      <a-box id="ventas" position="0 1 -3" color="#EF2D5E"></a-box>
+      <a-text value="Ventas" position="0 2 -3" align="center"></a-text>
+
+      <!-- Módulo Compras -->
+      <a-box id="compras" position="2 1 -3" color="#7BC8A4"></a-box>
+      <a-text value="Compras" position="2 2 -3" align="center"></a-text>
+
+      <!-- Texto dinámico (aparece al tocar un módulo) -->
+      <a-entity id="infoBox" visible="false">
+        <a-plane position="0 1.5 -2" width="3" height="1.5" color="#FFF"></a-plane>
+        <a-text id="infoText" value="" position="0 1.5 -2.01" color="#000" align="center" width="2.8"></a-text>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      // Referencias
+      const infoBox = document.querySelector("#infoBox");
+      const infoText = document.querySelector("#infoText");
+
+      // Contenido de los módulos
+      const modulos = {
+        "finanzas": "Gestión de contabilidad, reportes financieros y control de costos en tiempo real.",
+        "ventas": "Optimiza procesos de ventas, facturación y relación con clientes.",
+        "compras": "Gestión de proveedores, adquisiciones y control de inventarios."
+      };
+
+      // Eventos de clic
+      Object.keys(modulos).forEach(id => {
+        document.querySelector("#" + id).addEventListener("click", () => {
+          infoText.setAttribute("value", modulos[id]);
+          infoBox.setAttribute("visible", "true");
+        });
+      });
+    </script>
+  </body>
+</html>
