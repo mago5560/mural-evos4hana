@@ -1,247 +1,110 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Octágono en Realidad Aumentada</title>
+    <meta charset="utf-8">
+    <title>TI_DESA</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
         body {
             margin: 0;
-            padding: 0;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            color: white;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            font-family: 'Arial', sans-serif;
         }
-        
-        .container {
-            max-width: 900px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            margin: 20px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #fdbb2d;
-        }
-        
-        p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        
-        .instructions {
-            background: rgba(0, 0, 0, 0.7);
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
             padding: 15px;
             border-radius: 10px;
-            margin: 15px 0;
-            text-align: left;
-        }
-        
-        .instructions ol {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 10px;
-        }
-        
-        .button {
-            background: #fdbb2d;
-            color: #1a2a6c;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .button:hover {
-            background: #ffcc44;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-        }
-        
-        .a-frame-scene {
-            width: 100%;
-            height: 400px;
-            border: 3px solid #fdbb2d;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 20px 0;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-        }
-        
-        .info-panel {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(26, 42, 108, 0.95);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
+            max-width: 300px;
             z-index: 100;
-            max-width: 80%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-            border: 2px solid #fdbb2d;
-            text-align: left;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
         }
-        
-        .info-panel h3 {
-            color: #fdbb2d;
+        h1 {
+            font-size: 1.5em;
             margin-top: 0;
-            font-size: 1.8rem;
+            color: #0066cc;
         }
-        
-        .info-panel .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #fdbb2d;
-            color: #1a2a6c;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            font-weight: bold;
-            cursor: pointer;
+        .instructions {
+            font-size: 0.9em;
+            color: #333;
         }
-        
-        .footer {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                width: 95%;
-                padding: 15px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .a-frame-scene {
-                height: 300px;
-            }
-        }
-    </style>
+    </style><!---->
 </head>
 <body>
-    <div class="container">
-        <h1>Octágono en Realidad Aumentada</h1>
-        <h2>Con A-Frame y AR.js</h2>
-        
-        <p>Este ejemplo muestra un octágono en realidad aumentada que puedes visualizar a través de la cámara de tu dispositivo.</p>
-        
-        <div class="instructions">
-            <h3>Instrucciones:</h3>
-            <ol>
-                <li>Acepta los permisos de la cámara cuando se te solicite.</li>
-                <li>Busca una superficie plana y bien iluminada.</li>
-                <li>Acerca y aleja el marcador para ajustar el tamaño.</li>
-                <li>Haz clic en el octágono para ver información sobre esta figura geométrica.</li>
-            </ol>
-        </div>
-        
-        <button class="button" onclick="showInfo()">Ver información del octágono</button>
-        
-        <div class="a-frame-scene">
-            <!-- Escena de A-Frame -->
-            <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;' vr-mode-ui="enabled: false">
-                <!-- Marcador para realidad aumentada (patrón Hiro) -->
-                <a-marker type='pattern' url='https://raw.githack.com/AR-js-org/AR.js/master/aframe/data/data/patt.hiro'>
-                    <!-- Octágono 3D -->
-                    <a-entity id="octagon" geometry="primitive: cylinder; radius: 0.5; height: 0.1; segmentsRadial: 8" 
-                             material="color: #38A3A5; shader: flat" 
-                             position="0 0.05 0"
-                             animation="property: rotation; to: 0 360 0; loop: true; dur: 8000">
-                        <!-- Cara superior del octágono -->
-                        <a-entity geometry="primitive: circle; radius: 0.5; segments: 8" 
-                                 material="color: #38A3A5; shader: flat" 
-                                 position="0 0.051 0"
-                                 rotation="-90 0 0"></a-entity>
-                        <!-- Texto sobre el octágono -->
-                        <a-text value="Toca para info" align="center" position="0 0.2 0" color="#FFF" width="3"></a-text>
-                    </a-entity>
-                </a-marker>
-                
-                <!-- Cámara -->
-                <a-entity camera></a-entity>
-            </a-scene>
-        </div>
-        
-        <p class="footer">Nota: Para una mejor experiencia de RA, imprime el marcador Hiro y colócalo frente a la cámara.</p>
-    </div>
-    
-    <!-- Panel de información que aparecerá al hacer clic -->
-    <div id="infoPanel" class="info-panel">
-        <button class="close-btn" onclick="hideInfo()">X</button>
-        <h3>El Octágono</h3>
-        <p>Un octágono es un polígono de ocho lados y ocho ángulos. La palabra proviene del griego "oktá" (ocho) y "gonía" (ángulo).</p>
-        <p><strong>Características:</strong></p>
-        <ul>
-            <li>Tiene 8 lados y 8 vértices</li>
-            <li>La suma de sus ángulos internos es 1080°</li>
-            <li>Cada ángulo interno de un octágono regular mide 135°</li>
-            <li>Es la forma de muchas señales de tráfico como "PARE"</li>
-        </ul>
-        <p>En arquitectura, los octágonos se han utilizado desde la antigüedad para construir edificios, fuentes y cúpulas.</p>
-    </div>
+    <div id="info-panel">
+        <h1>Muro Virtual</h1>
+        <p class="instructions">Usa el ratón para mirar alrededor y las teclas WASD para moverte. Acércate al muro para ver los detalles.</p>
+        <p>Este muro virtual, fue diseñado para que pueda ser visto desde un dispositivo movil. EVOLUTION SAP S/4HANA.</p>
+    </div><!---->
 
-    <script>
-        // Obtener referencias a los elementos
-        const octagon = document.querySelector('#octagon');
-        const infoPanel = document.getElementById('infoPanel');
+    <a-scene>
+        <!-- Assets -->
+        <a-assets>
+
+            <!--
+          <img id="mural" src="https://i.postimg.cc/zfp2wr4S/Flux-Dev-Futuristic-corporate-mural-representing-SAP-S4-HANA-im-1.jpg"  crossorigin="anonymous" >
+            <img id="floor-texture" src="https://i.postimg.cc/8CbTz3V0/floor-tile.jpg" crossorigin="anonymous">
+             <img id="wall-texture" src="https://i.postimg.cc/8z3jv3v1/wall-concrete.jpg" crossorigin="anonymous">
+            <img id="ceiling-texture" src="https://i.postimg.cc/8z3jv3v1/wall-concrete.jpg" crossorigin="anonymous">
+            -->
+        </a-assets>
+
+        <!-- Camera -->
+        <a-entity id="rig" movement-controls position="0 1.6 6">
+
+            <!-- Camara estatica <a-entity camera look-controls position="0 0 0"></a-entity>-->
+                  <a-cursor></a-cursor>
+        </a-entity>
+
+        <!--investigar para que funciona-->
+        <!--
+        <a-light type="ambient" color="#4455aa" intensity="0.2"></a-light>
+        <a-light type="directional" color="#ffffff" intensity="0.6" position="-1 2 1"></a-light>
+        -->
+        <a-light type="ambient" color="#4455aa" intensity="0.2"></a-light>
+        <a-light type="directional" color="#ffffff"  intensity="0.2" position="-1 2 1"></a-light>
+        <!--Luces de enfrente-->
+        <a-light type="point" color="#ffffff" intensity="0.8" position="2.5 2.5 3"></a-light>
+        <a-light type="point" color="#ffffff" intensity="0.8" position="-2.5 2.5 3"></a-light>
+
         
-        // Agregar evento de clic al octágono
-        octagon.addEventListener('click', function() {
-            showInfo();
+        
+        <!-- Imagen del mural -->
+        <a-plane src="#mural"  rotation="0 0 0" position="0 2.5 -4" width="15" height="8" shadow></a-plane>
+
+        <!-- Pizo -->
+        <a-plane src="#floor-texture" rotation="-90 0 0" width="15" height="15" repeat="5 5" shadow></a-plane>
+
+        <!-- Techo -->
+        <a-plane src="#ceiling-texture" rotation="90 0 0" width="15" height="15" position="0 5 0" repeat="5 5"></a-plane>
+
+          <!-- Paredes -->
+        <!--Izquierda-->
+        <a-plane src="#wall-texture" rotation="0 90 0" width="15" height="5" position="-7.5 2.5 0" repeat="3 1"></a-plane>
+        <!--Derecha-->
+        <a-plane src="#wall-texture" rotation="0 -90 0" width="15" height="5" position="7.5 2.5 0" repeat="3 1"></a-plane>
+        <!--Fondo-->
+        <a-plane src="#wall-texture" rotation="0 0 0" width="15" height="5" position="0 2.5 -5" repeat="3 1"></a-plane>
+        <!--Frente-->
+        <!--<a-plane src="#wall-texture" rotation="0 0 0" width="15" height="5" position="0 2.5 5" repeat="3 1"></a-plane>-->
+
+
+      
+      
+    </a-scene>
+    
+    <script>
+        // Añadir interactividad básica
+        document.querySelector('a-plane').addEventListener('mouseenter', function() {
+            this.setAttribute('scale', '1.02 1.02 1');
         });
         
-        // Función para mostrar el panel de información
-        function showInfo() {
-            infoPanel.style.display = 'block';
-        }
-        
-        // Función para ocultar el panel de información
-        function hideInfo() {
-            infoPanel.style.display = 'none';
-        }
-        
-        // También cerrar al tocar fuera en dispositivos móviles
-        document.addEventListener('touchstart', function(e) {
-            if (infoPanel.style.display === 'block' && !infoPanel.contains(e.target)) {
-                hideInfo();
-            }
+        document.querySelector('a-plane').addEventListener('mouseleave', function() {
+            this.setAttribute('scale', '1 1 1');
         });
     </script>
+    <!---->
 </body>
 </html>
