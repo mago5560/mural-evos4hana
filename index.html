@@ -1,101 +1,125 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <title>TI_DESA</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <head>
+    <meta charset="utf-8" />
+    <title>A-Frame + Div Info</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-        }
-        #info-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px;
-            border-radius: 10px;
-            max-width: 300px;
-            z-index: 100;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-        }
-        h1 {
-            font-size: 1.5em;
-            margin-top: 0;
-            color: #0066cc;
-        }
-        .instructions {
-            font-size: 0.9em;
-            color: #333;
-        }
-    </style><!---->
-</head>
-<body>
-    <div id="info-panel">
-        <h1>Muro Virtual</h1>
-        <p class="instructions">Usa el ratón para mirar alrededor y las teclas WASD para moverte. Acércate al muro para ver los detalles.</p>
-        <p>Este muro virtual, fue diseñado para que pueda ser visto desde un dispositivo movil. EVOLUTION SAP S/4HANA.</p>
-    </div><!---->
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+      }
 
+      /* El div pequeño */
+      #miniCard {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        padding: 10px 20px;
+        background: #3498db;
+        color: white;
+        cursor: pointer;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
+      }
+      #miniCard:hover {
+        transform: scale(1.05);
+      }
+
+      /* El div grande oculto */
+      #infoCard {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        background: white;
+        color: black;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 8px 12px rgba(0,0,0,0.4);
+      }
+
+      #closeBtn {
+        display: block;
+        margin-top: 20px;
+        padding: 8px 16px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      #closeBtn:hover {
+        background: #c0392b;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Escena A-Frame -->
     <a-scene>
-        <!-- Assets -->
-        <a-assets>
 
-            <!--
-          <img id="mural" src="https://i.postimg.cc/zfp2wr4S/Flux-Dev-Futuristic-corporate-mural-representing-SAP-S4-HANA-im-1.jpg"  crossorigin="anonymous" >
-            <img id="floor-texture" src="https://i.postimg.cc/8CbTz3V0/floor-tile.jpg" crossorigin="anonymous">
-             <img id="wall-texture" src="https://i.postimg.cc/8z3jv3v1/wall-concrete.jpg" crossorigin="anonymous">
-            <img id="ceiling-texture" src="https://i.postimg.cc/8z3jv3v1/wall-concrete.jpg" crossorigin="anonymous">
-            -->
-        </a-assets>
+         <!-- Cámara con cursor para poder detectar clics  wasd-controls   movement-controls -->
+      <a-entity camera 
+      look-controls   
+ wasd-controls  
+   movement-controls="
+    controls: gamepad, hand;
+    fly: true;
+    speed: 0.8
+  "
+      position="0 1.6 1">
+          
+        <a-cursor></a-cursor>
+      </a-entity>
 
-        <!-- Camera -->
-        <a-entity id="rig" movement-controls position="0 1.6 6">
 
-            <!-- Camara estatica <a-entity camera look-controls position="0 0 0"></a-entity>-->
-                  <a-cursor></a-cursor>
-        </a-entity>
-
-        <!--investigar para que funciona-->
-        <!--
-        <a-light type="ambient" color="#4455aa" intensity="0.2"></a-light>
-        <a-light type="directional" color="#ffffff" intensity="0.6" position="-1 2 1"></a-light>
-        -->
-        <a-light type="ambient" color="#4455aa" intensity="0.2"></a-light>
-        <a-light type="directional" color="#ffffff"  intensity="0.2" position="-1 2 1"></a-light>
-        <!--Luces de enfrente-->
-        <a-light type="point" color="#ffffff" intensity="0.8" position="2.5 2.5 3"></a-light>
-        <a-light type="point" color="#ffffff" intensity="0.8" position="-2.5 2.5 3"></a-light>
-
-        
-        
-        <!-- Imagen del mural -->
-        <a-plane src="#mural"  rotation="0 0 0" position="0 2.5 -4" width="15" height="8" shadow></a-plane>
-
-        <!-- Pizo -->
-        <a-plane src="#floor-texture" rotation="-90 0 0" width="15" height="15" repeat="5 5" shadow></a-plane>
-
-        <!-- Techo -->
-        <a-plane src="#ceiling-texture" rotation="90 0 0" width="15" height="15" position="0 5 0" repeat="5 5"></a-plane>
-
-          <!-- Paredes -->
-        <!--Izquierda-->
-        <a-plane src="#wall-texture" rotation="0 90 0" width="15" height="5" position="-7.5 2.5 0" repeat="3 1"></a-plane>
-        <!--Derecha-->
-        <a-plane src="#wall-texture" rotation="0 -90 0" width="15" height="5" position="7.5 2.5 0" repeat="3 1"></a-plane>
-        <!--Fondo-->
-        <a-plane src="#wall-texture" rotation="0 0 0" width="15" height="5" position="0 2.5 -5" repeat="3 1"></a-plane>
-        <!--Frente-->
-        <!--<a-plane src="#wall-texture" rotation="0 0 0" width="15" height="5" position="0 2.5 5" repeat="3 1"></a-plane>-->
+       <!-- Objeto clickeable -->
+      <a-box id="miniCardV2" position="0 1.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
 
 
       
       
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
+      <a-sky color="#ECECEC"></a-sky>
     </a-scene>
-    
+
+    <!-- Div pequeño -->
+    <div id="miniCard">Haz clic aquí</div>
+
+    <!-- Div grande oculto -->
+    <div id="infoCard">
+      <h2>Información Detallada</h2>
+      <p>
+        Este es un cuadro de información que aparece cuando das clic en el
+        botón pequeño. Aquí puedes colocar cualquier texto, imágenes o incluso
+        enlaces.
+      </p>
+      <button id="closeBtn">Cerrar</button>
+    </div>
+
     <script>
+      const miniCardV2 = document.getElementById("miniCardV2");
+      const miniCard = document.getElementById("miniCard");
+      const infoCard = document.getElementById("infoCard");
+      const closeBtn = document.getElementById("closeBtn");
+
+      // Evento click de A-Frame
+      miniCardV2.addEventListener("click", () => {
+        infoCard.style.display = "block";
+      });
+
+      miniCard.addEventListener("click", () => {
+        infoCard.style.display = "block";
+      });
+
+      closeBtn.addEventListener("click", () => {
+        infoCard.style.display = "none";
+      });
+
         // Añadir interactividad básica
         document.querySelector('a-plane').addEventListener('mouseenter', function() {
             this.setAttribute('scale', '1.02 1.02 1');
@@ -105,6 +129,5 @@
             this.setAttribute('scale', '1 1 1');
         });
     </script>
-    <!---->
-</body>
+  </body>
 </html>
