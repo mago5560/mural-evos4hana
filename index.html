@@ -3,170 +3,446 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AR.js Octágonos Interactivos</title>
+  <title>AR.js Imágenes Interactivas - Mejorado</title>
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <!-- AR.js para A-Frame -->
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   <style>
-    body { margin: 0; overflow: hidden; }
-    .hint { 
-      position: fixed; 
-      left: 0; 
-      right: 0; 
-      bottom: 0; 
-      padding: 10px 12px; 
-      font-family: system-ui, sans-serif; 
-      background: rgba(0,0,0,.55); 
-      color: #fff; 
-      text-align: center; 
-      z-index: 10; 
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
     }
+   
+    .ui-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+   
+    .hint {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 20px;
+      padding: 12px 20px;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      border-radius: 25px;
+      font-size: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      max-width: 80%;
+      text-align: center;
+      pointer-events: auto;
+      animation: fadeIn 0.5s ease-out;
+    }
+   
+    .controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: auto;
+    }
+   
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.9);
+      color: #333;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+   
+    .control-btn:hover {
+      background: #fff;
+      transform: scale(1.1);
+    }
+   
+    .loading-indicator {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 16px;
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+      border-radius: 10px;
+      pointer-events: auto;
+    }
+   
     #patternMarker {
       display: none;
+    }
+   
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+   
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+   
+    .pulsing {
+      animation: pulse 2s infinite;
     }
   </style>
 </head>
 <body>
-  <!-- Cambia este mensaje para que refleje tu imagen específica -->
-  <div class="hint">Apunta a tu imagen personalizada. Toca un octágono para centrarlo y agrandarlo.</div>
-
-  <!-- Patrón del marcador (debes reemplazar la URL con la de tu imagen) -->
-  <!--<img id="patternMarker" src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Pattern Marker">
-  url de la camare
-  url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.patt" -->
+  <div class="ui-overlay">
+    <div class="hint" id="hint">
+      Apunta al marcador y toca una imagen para centrarla
+    </div>
+   
+    <div class="controls">
+      <button class="control-btn" id="resetBtn" title="Reiniciar vista">🔄</button>
+      <button class="control-btn" id="zoomBtn" title="Alternar zoom">🔍</button>
+    </div>
+   
+    <div class="loading-indicator" id="loading" style="display: none;">
+      Cargando AR...
+    </div>
+  </div>
+ 
   <img id="patternMarker" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/sdinicio.png" alt="Pattern Marker">
-
+ 
   <a-scene
     vr-mode-ui="enabled: false"
-    renderer="antialias: true; colorManagement: true; precision: medium;"
+    renderer="antialias: true; colorManagement: true; precision: medium; alpha: true;"
     embedded
     arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+    loading-screen="enabled: false"
   >
-    <!-- Añadimos un asset para el marcador de imagen -->
+    <!-- Assets con imágenes -->
     <a-assets>
-      <a-asset-item id="patternMarkerSrc" src="#patternMarker"></a-asset-item>
+      <img id="img1" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/Apli_SD.png" crossorigin="anonymous">
+      <img id="img2" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/CO.png" crossorigin="anonymous">
+      <img id="img3" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EWM.png" crossorigin="anonymous">
+      <img id="img4" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/FI.png" crossorigin="anonymous">
+      <img id="img5" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/HCM.png" crossorigin="anonymous">
+      <img id="img6" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/MM.png" crossorigin="anonymous">
+      <img id="img7" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PM.png" crossorigin="anonymous">
+      <img id="img8" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PP.png" crossorigin="anonymous">
+      <img id="img9" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/QM.png" crossorigin="anonymous">
+      <img id="img10" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/SD.png" crossorigin="anonymous">
     </a-assets>
-
-    <!-- Luz suave para resaltar los bordes -->
-    <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-    <a-entity light="type: directional; intensity: 0.6" position="1 1 0"></a-entity>
-
-    <!-- Marcador de imagen personalizado (reemplaza 'hiro' con tu patrón) -->
-    <a-marker 
-      type="pattern" 
+ 
+    <!-- Luces mejoradas -->
+    <a-entity light="type: ambient; intensity: 0.6; color: #ffffff"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8; color: #ffffff" position="2 4 2"></a-entity>
+    <a-entity light="type: point; intensity: 0.3; color: #ffffff" position="0 2 0"></a-entity>
+ 
+    <!-- Marcador -->
+    <a-marker
+      type="pattern"
       url="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/pattern-sdinicio.patt"
-      raycaster="objects: .clickable"
-      emitevents="true" 
-      cursor="rayOrigin: mouse"
-      id="marker">
-      
-      <!-- Contenedor de todos los octágonos -->
-      <a-entity id="octagon-group" position="0 0 0"></a-entity>
+      raycaster="objects: .clickable; far: 50; near: 0"
+      emitevents="true"
+      cursor="rayOrigin: mouse; fuse: false"
+      id="marker"
+      smooth="true"
+      smoothCount="10"
+      smoothTolerance="0.01"
+      smoothThreshold="5">
+     
+      <!-- Contenedor de las imágenes -->
+      <a-entity id="image-group" position="0 0 0" rotation="0 0 0"></a-entity>
+     
+      <!-- Indicador del centro -->
+      <a-ring
+        id="center-indicator"
+        position="0 0.05 0"
+        rotation="-90 0 0"
+        radius-inner="1.8"
+        radius-outer="2"
+        color="#03A9F4"
+        opacity="0.3"
+        visible="true">
+      </a-ring>
     </a-marker>
-
-    <!-- Cámara y cursor basado en el puntero (soporta toque/pulsación) -->
-    <a-entity camera look-controls>
-      <a-cursor rayOrigin="mouse"></a-cursor>
+ 
+    <!-- Cámara y cursor -->
+    <a-entity camera look-controls wasd-controls="enabled: true">
+      <a-cursor
+        rayOrigin="mouse"
+        geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+        material="color: #03A9F4; shader: flat"
+        position="0 0 -1"
+        visible="true">
+      </a-cursor>
     </a-entity>
   </a-scene>
-
+ 
   <script>
-    // Utilidad: crear un "octágono" como cilindro de 8 lados, muy delgado
-    function createOctagon(id, position, color, scale = {x:1, y:1, z:1}) {
-      const e = document.createElement('a-entity');
+    let currentZoomLevel = 1;
+    let isAnimating = false;
+    const originalPositions = {};
+   
+    // Configuración mejorada
+    const CONFIG = {
+      RING_RADIUS: 3.2,        // Radio del anillo (aumentado)
+      Y_POSITION: 0.08,        // Altura de las imágenes
+      CENTER_SCALE: {x: 2.8, y: 1.4, z: 1},    // Escala central (reducida)
+      RING_SCALE: {x: 1.4, y: 0.7, z: 1},      // Escala del anillo (reducida)
+      ANIMATION_DURATION: 400,  // Duración de animaciones
+      HOVER_SCALE: 1.1,        // Escala al hover
+      MIN_SEPARATION: 0.8      // Separación mínima entre imágenes
+    };
+ 
+    // Crear un plano con imagen mejorado
+    function createImagePlane(id, src, position, scale = CONFIG.RING_SCALE, isCenter = false) {
+      const e = document.createElement('a-plane');
       e.setAttribute('id', id);
-      e.classList.add('octagon');
-      e.classList.add('clickable'); // Añadimos clase para interacción
-      e.setAttribute('geometry', {
-        primitive: 'cylinder',
-        radius: 0.28,
-        height: 0.04,
-        segmentsRadial: 8
-      });
-      e.setAttribute('material', { color, metalness: 0.2, roughness: 0.5 });
+      e.classList.add('imgplane', 'clickable');
+      e.setAttribute('material', `src: ${src}; side: double; transparent: true; alphaTest: 0.1`);
+      e.setAttribute('geometry', `width: ${scale.x}; height: ${scale.y}`);
       e.setAttribute('position', position);
-      e.setAttribute('rotation', '0 0 0');
-      e.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
-      // Pequeña sombra de borde
-      e.setAttribute('shadow', 'cast: true; receive: true');
+      e.setAttribute('rotation', '-90 0 0');
+     
+      // Agregar efectos visuales
+      if (!isCenter) {
+        e.setAttribute('animation__hover', {
+          property: 'scale',
+          to: `${CONFIG.HOVER_SCALE} ${CONFIG.HOVER_SCALE} 1`,
+          startEvents: 'mouseenter',
+          dur: 200,
+          easing: 'easeOutQuad'
+        });
+       
+        e.setAttribute('animation__unhover', {
+          property: 'scale',
+          to: '1 1 1',
+          startEvents: 'mouseleave',
+          dur: 200,
+          easing: 'easeOutQuad'
+        });
+      }
+     
       return e;
     }
-
-    const group = document.getElementById('octagon-group');
-
-    // Colores agradables (10 + 1 central)
-    const palette = [
-      '#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#B28DFF',
-      '#FF8FAB', '#F6BD60', '#84DCC6', '#95A6FF', '#F7A072', '#7AD9F5'
+ 
+    // Calcular posiciones sin superposición
+    function calculateOptimalPositions(count) {
+      const positions = [];
+      const angleStep = (Math.PI * 2) / (count - 1);
+     
+      for (let i = 0; i < count - 1; i++) {
+        const angle = i * angleStep;
+        const x = CONFIG.RING_RADIUS * Math.cos(angle);
+        const z = CONFIG.RING_RADIUS * Math.sin(angle);
+        positions.push({x, y: CONFIG.Y_POSITION, z});
+      }
+     
+      return positions;
+    }
+ 
+    const group = document.getElementById('image-group');
+    const centerIndicator = document.getElementById('center-indicator');
+ 
+    const images = [
+      '#img1', '#img1','#img2','#img3','#img4','#img5',
+      '#img6','#img7','#img8','#img9','#img10'
     ];
-
-    // Octágono central inicial
-    const centerId = 'octagon-center';
-    const center = createOctagon(centerId, '0 0.1 0', palette[10], {x:1.7, y:1.7, z:1.7});
+ 
+    // Imagen central inicial
+    const center = createImagePlane(
+      'img-center',
+      images[0],
+      `0 ${CONFIG.Y_POSITION} 0`,
+      CONFIG.CENTER_SCALE,
+      true
+    );
     center.dataset.isCenter = 'true';
+    center.dataset.originalIndex = '0';
     group.appendChild(center);
-
-    // Crear 10 octágonos alrededor en círculo
-    const R = 1.35; // radio del anillo
-    const Y = 0.1;  // altura
-    const count = 10;
-
-    for (let i = 0; i < count; i++) {
-      const theta = (i / count) * Math.PI * 2;
-      const x = R * Math.cos(theta);
-      const z = R * Math.sin(theta);
-      const id = `octagon-${i+1}`;
-      const oct = createOctagon(id, `${x.toFixed(3)} ${Y} ${z.toFixed(3)}`, palette[i], {x:1, y:1, z:1});
-      // Guardar su posición original para intercambios futuros
-      oct.dataset.originalPosition = `${x} ${Y} ${z}`;
-      group.appendChild(oct);
+ 
+    // Calcular posiciones óptimas para evitar superposición
+    const ringPositions = calculateOptimalPositions(images.length);
+ 
+    // Colocar las demás en círculo con posiciones optimizadas
+    for (let i = 1; i < images.length; i++) {
+      const pos = ringPositions[i - 1];
+      const id = `img-${i}`;
+      const posStr = `${pos.x.toFixed(3)} ${pos.y} ${pos.z.toFixed(3)}`;
+     
+      const plane = createImagePlane(id, images[i], posStr, CONFIG.RING_SCALE);
+      plane.dataset.originalPosition = posStr;
+      plane.dataset.originalIndex = i.toString();
+      originalPositions[i] = pos;
+     
+      group.appendChild(plane);
     }
-
-    // Animar transición suave
-    function animateTo(entity, toPos, toScale, dur = 350) {
+ 
+    // Animaciones mejoradas
+    function animateTo(entity, toPos, toScale, dur = CONFIG.ANIMATION_DURATION) {
+      if (isAnimating) return;
+     
       entity.setAttribute('animation__pos', {
-        property: 'position', to: toPos, dur, easing: 'easeInOutQuad'
+        property: 'position',
+        to: toPos,
+        dur,
+        easing: 'easeInOutCubic'
       });
+     
       entity.setAttribute('animation__scale', {
-        property: 'scale', to: toScale, dur, easing: 'easeInOutQuad'
+        property: 'geometry',
+        to: `width: ${toScale.x}; height: ${toScale.y}`,
+        dur,
+        easing: 'easeInOutCubic'
       });
     }
-
+ 
     function swapToCenter(target) {
+      if (isAnimating) return;
+     
       const currentCenter = group.querySelector('[data-is-center="true"]');
       if (!currentCenter || target === currentCenter) return;
-
-      // Posiciones/escala
-      const targetOriginalPos = target.getAttribute('position');
-      const centerOriginalPos = currentCenter.getAttribute('position');
-
-      const targetOriginalSlot = target.dataset.originalPosition || `${targetOriginalPos.x} ${targetOriginalPos.y} ${targetOriginalPos.z}`;
-      const centerScaleSmall = '1 1 1';
-      const bigScale = '1.7 1.7 1.7';
-
-      // 1) Mover el target al centro y agrandarlo
-      animateTo(target, '0 0.1 0', bigScale);
+ 
+      isAnimating = true;
+     
+      const targetOriginalPos = target.dataset.originalPosition;
+      const targetIndex = target.dataset.originalIndex;
+      const centerIndex = currentCenter.dataset.originalIndex;
+ 
+      // Animación hacia el centro
+      animateTo(target, `0 ${CONFIG.Y_POSITION} 0`, CONFIG.CENTER_SCALE);
       target.dataset.isCenter = 'true';
-
-      // 2) Mover el que estaba al centro hacia el lugar original del target y hacerlo pequeño
-      animateTo(currentCenter, targetOriginalSlot, centerScaleSmall);
+     
+      // Mostrar indicador del centro brevemente
+      centerIndicator.setAttribute('visible', true);
+      setTimeout(() => {
+        centerIndicator.setAttribute('visible', false);
+      }, 1000);
+ 
+      // Animación desde el centro hacia el anillo
+      animateTo(currentCenter, targetOriginalPos, CONFIG.RING_SCALE);
       delete currentCenter.dataset.isCenter;
-
-      // 3) Actualizar data-originalPosition: el que sale al anillo hereda el slot del target
-      currentCenter.dataset.originalPosition = targetOriginalSlot;
+      currentCenter.dataset.originalPosition = targetOriginalPos;
+ 
+      // Intercambiar índices
+      target.dataset.originalIndex = centerIndex;
+      currentCenter.dataset.originalIndex = targetIndex;
+ 
+      // Actualizar hint
+      updateHint(`Imagen ${parseInt(targetIndex) + 1} seleccionada`);
+     
+      setTimeout(() => {
+        isAnimating = false;
+      }, CONFIG.ANIMATION_DURATION);
     }
-
-    // Interacción: tocar/click sobre cualquier octágono del anillo
+ 
+    function updateHint(message) {
+      const hint = document.getElementById('hint');
+      hint.textContent = message;
+      hint.classList.remove('pulsing');
+      setTimeout(() => {
+        hint.classList.add('pulsing');
+      }, 100);
+     
+      setTimeout(() => {
+        hint.textContent = 'Toca una imagen para centrarla';
+        hint.classList.remove('pulsing');
+      }, 2000);
+    }
+ 
+    function resetView() {
+      if (isAnimating) return;
+     
+      isAnimating = true;
+      const currentCenter = group.querySelector('[data-is-center="true"]');
+     
+      if (currentCenter && currentCenter.dataset.originalIndex !== '0') {
+        // Encontrar la imagen original del centro
+        const originalCenter = group.querySelector(`[data-original-index="0"]`);
+        if (originalCenter && originalCenter !== currentCenter) {
+          swapToCenter(originalCenter);
+        }
+      }
+     
+      updateHint('Vista reiniciada');
+      setTimeout(() => { isAnimating = false; }, CONFIG.ANIMATION_DURATION);
+    }
+ 
+    function toggleZoom() {
+      currentZoomLevel = currentZoomLevel === 1 ? 1.3 : 1;
+      const scaleStr = `${currentZoomLevel} ${currentZoomLevel} ${currentZoomLevel}`;
+     
+      group.setAttribute('animation', {
+        property: 'scale',
+        to: scaleStr,
+        dur: 300,
+        easing: 'easeInOutQuad'
+      });
+     
+      updateHint(currentZoomLevel > 1 ? 'Vista ampliada' : 'Vista normal');
+    }
+ 
+    // Event listeners
     group.addEventListener('click', (ev) => {
       const t = ev.target;
-      if (!t.classList || !t.classList.contains('octagon')) return;
+      if (!t.classList || !t.classList.contains('imgplane')) return;
       if (t.dataset.isCenter === 'true') return;
+     
       swapToCenter(t);
     });
-
-    // Evitar que el tap arrastre la escena en móviles
-    document.body.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+ 
+    // Controles UI
+    document.getElementById('resetBtn').addEventListener('click', resetView);
+    document.getElementById('zoomBtn').addEventListener('click', toggleZoom);
+ 
+    // Prevenir scroll en móviles
+    document.body.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+ 
+    // Mejorar la detección de toque en móviles
+    let touchStartTime = 0;
+    group.addEventListener('touchstart', () => {
+      touchStartTime = Date.now();
+    });
+   
+    group.addEventListener('touchend', (ev) => {
+      const touchDuration = Date.now() - touchStartTime;
+      if (touchDuration < 500) { // Toque rápido
+        const t = ev.target;
+        if (t.classList && t.classList.contains('imgplane') && t.dataset.isCenter !== 'true') {
+          swapToCenter(t);
+        }
+      }
+    });
+ 
+    // Inicialización
+    setTimeout(() => {
+      updateHint('¡AR listo! Apunta al marcador');
+    }, 1000);
+ 
+    // Debugging - mostrar cuando se detecta el marcador
+    const marker = document.getElementById('marker');
+    marker.addEventListener('markerFound', () => {
+      updateHint('¡Marcador detectado!');
+    });
+   
+    marker.addEventListener('markerLost', () => {
+      updateHint('Marcador perdido - reenfoca');
+    });
   </script>
 </body>
 </html>
