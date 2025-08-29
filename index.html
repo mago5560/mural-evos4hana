@@ -143,6 +143,9 @@
       <img id="img8" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PP.png" crossorigin="anonymous">
       <img id="img9" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/QM.png" crossorigin="anonymous">
       <img id="img10" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/SD.png" crossorigin="anonymous">
+
+      <a-asset-item id="eva" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EvaBot.glb"></a-asset-item>
+      <a-asset-item id="walle" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/WalleBot.glb"></a-asset-item>
     </a-assets>
  
     <!-- Luces mejoradas -->
@@ -179,6 +182,11 @@
       </a-ring>
     </a-marker>
  
+          <!-- Modelo de Eva con movimiento automático -->
+                <a-entity id="eva" position="0 0.5 0" rotation="0 0 0" scale="1.2 1.2 1.2" 
+                          gltf-model="#eva-model" animation-mixer="clip: *; loop: repeat">
+                </a-entity>
+                
     <!-- Cámara y cursor -->
     <a-entity camera look-controls wasd-controls="enabled: true">
       <a-cursor
@@ -443,6 +451,199 @@
     marker.addEventListener('markerLost', () => {
       updateHint('Marcador perdido - reenfoca');
     });
+
+
+
+
+    //Movimiento EVA y Walle
+          // Variables globales
+        let currentBehavior = 'patrol';
+        let currentSpeed = 1;
+        let movementInterval;
+        let cameraMode = 'follow';
+
+// Obtener referencia a Eva
+            const eva = document.querySelector('#eva');
+   // Iniciar movimiento automático
+        function startAutomaticMovement() {
+            const eva = document.querySelector('#eva');
+            
+            // Limpiar cualquier intervalo existente
+            if (movementInterval) clearInterval(movementInterval);
+            
+            // Configurar el intervalo según el comportamiento actual
+            switch(currentBehavior) {
+                case 'patrol':
+                    patrolMovement(eva);
+                    break;
+                case 'hover':
+                    hoverMovement(eva);
+                    break;
+                case 'circle':
+                    circleMovement(eva);
+                    break;
+                case 'random':
+                    randomMovement(eva);
+                    break;
+            }
+        }
+        
+        // Comportamiento: Patrullar
+        function patrolMovement(eva) {
+            const points = [
+                {x: -3, y: 0.5, z: -3},
+                {x: 3, y: 0.5, z: -3},
+                {x: 3, y: 0.5, z: 3},
+                {x: -3, y: 0.5, z: 3}
+            ];
+            let currentPoint = 0;
+            
+            movementInterval = setInterval(() => {
+                const nextPoint = points[currentPoint % points.length];
+                eva.setAttribute('animation', {
+                    property: 'position',
+                    to: `${nextPoint.x} ${nextPoint.y} ${nextPoint.z}`,
+                    dur: 3000 / currentSpeed,
+                    easing: 'easeInOutQuad'
+                });
+                
+                // Rotar hacia el siguiente punto
+                const currentPos = eva.getAttribute('position');
+                const angle = Math.atan2(nextPoint.x - currentPos.x, nextPoint.z - currentPos.z) * 180 / Math.PI;
+                eva.setAttribute('animation__rotation', {
+                    property: 'rotation',
+                    to: `0 ${angle} 0`,
+                    dur: 1000 / currentSpeed,
+                    easing: 'easeInOutQuad'
+                });
+                
+                currentPoint++;
+            }, 3000 / currentSpeed);
+        }
+        
+        // Comportamiento: Flotar
+        function hoverMovement(eva) {
+            let goingUp = true;
+            
+            movementInterval = setInterval(() => {
+                const currentPos = eva.getAttribute('position');
+                const newY = goingUp ? 2 : 0.5;
+                
+                eva.setAttribute('animation', {
+                    property: 'position',
+                    to: `${currentPos.x} ${newY} ${currentPos.z}`,
+                    dur: 2000 / currentSpeed,
+                    easing: 'easeInOutQuad'
+                });
+                
+                goingUp = !goingUp;
+            }, 2000 / currentSpeed);
+        }
+        
+        // Comportamiento: Circular
+        function circleMovement(eva) {
+            let angle = 0;
+            const radius = 3;
+            const center = {x: 0, y: 0.5, z: 0};
+            
+            movementInterval = setInterval(() => {
+                angle += 0.1 * currentSpeed;
+                const x = center.x + radius * Math.cos(angle);
+                const z = center.z + radius * Math.sin(angle);
+                
+                eva.setAttribute('position', {
+                    x: x,
+                    y: center.y,
+                    z: z
+                });
+                
+                // Rotar en la dirección del movimiento
+                eva.setAttribute('rotation', {
+                    x: 0,
+                    y: -angle * 180 / Math.PI + 90,
+                    z: 0
+                });
+            }, 50);
+        }
+        
+        // Comportamiento: Aleatorio
+        function randomMovement(eva) {
+            movementInterval = setInterval(() => {
+                const x = -4 + Math.random() * 8;
+                const z = -4 + Math.random() * 8;
+                
+                eva.setAttribute('animation', {
+                    property: 'position',
+                    to: `${x} 0.5 ${z}`,
+                    dur: 2000 / currentSpeed,
+                    easing: 'easeInOutQuad'
+                });
+                
+                // Rotar hacia la nueva posición
+                const currentPos = eva.getAttribute('position');
+                const angle = Math.atan2(x - currentPos.x, z - currentPos.z) * 180 / Math.PI;
+                eva.setAttribute('animation__rotation', {
+                    property: 'rotation',
+                    to: `0 ${angle} 0`,
+                    dur: 1000 / currentSpeed,
+                    easing: 'easeInOutQuad'
+                });
+            }, 2000 / currentSpeed);
+        }
+        
+        // Cambiar comportamiento
+        function changeBehavior(behavior) {
+            currentBehavior = behavior;
+            document.getElementById('behavior-status').textContent = `Comportamiento: ${getBehaviorName(behavior)}`;
+            startAutomaticMovement();
+        }
+        
+        // Cambiar velocidad
+        function changeSpeed(speed) {
+            switch(speed) {
+                case 'slow':
+                    currentSpeed = 0.5;
+                    break;
+                case 'normal':
+                    currentSpeed = 1;
+                    break;
+                case 'fast':
+                    currentSpeed = 2;
+                    break;
+            }
+            document.getElementById('speed-status').textContent = `Velocidad: ${getSpeedName(speed)}`;
+            startAutomaticMovement();
+        }
+        
+        // Cambiar vista de cámara
+        function changeCameraView(view) {
+            cameraMode = view;
+            const cameraRig = document.querySelector('#camera-rig');
+            
+            switch(view) {
+                case 'follow':
+                    // La cámara se actualiza en el intervalo principal
+                    break;
+                case 'overview':
+                    cameraRig.setAttribute('animation', {
+                        property: 'position',
+                        to: '0 8 0',
+                        dur: 1000,
+                        easing: 'easeInOutQuad'
+                    });
+                    break;
+                case 'firstPerson':
+                    const evaPosition = document.querySelector('#eva').getAttribute('position');
+                    cameraRig.setAttribute('animation', {
+                        property: 'position',
+                        to: `${evaPosition.x} ${evaPosition.y + 0.5} ${evaPosition.z + 1}`,
+                        dur: 1000,
+                        easing: 'easeInOutQuad'
+                    });
+                    break;
+            }
+        }
+
   </script>
 </body>
 </html>
