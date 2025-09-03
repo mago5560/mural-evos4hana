@@ -2,590 +2,252 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-
-
-  <title>AR Tarjeta Interactiva - Módulos SAP HANA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AR.js Octágonos Interactivos</title>
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <!-- AR.js para A-Frame -->
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   <style>
-    body { 
-      margin: 0; 
-      overflow: hidden; 
-      font-family: system-ui, sans-serif;
-      touch-action: none;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    
-    .ui-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-      z-index: 10;
-    }
-    
+    body { margin: 0; overflow: hidden; }
     .hint { 
       position: fixed; 
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 80px; 
-      padding: 10px 16px; 
-      background: rgba(0,0,0,0.85); 
+      left: 0; 
+      right: 0; 
+      bottom: 0; 
+      padding: 10px 12px; 
+      font-family: system-ui, sans-serif; 
+      background: rgba(0,0,0,.55); 
       color: #fff; 
-      border-radius: 20px;
-      font-size: 13px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      backdrop-filter: blur(8px);
-      max-width: 85%;
-      text-align: center;
-      pointer-events: auto;
-      animation: fadeIn 0.5s ease-out;
+      text-align: center; 
+      z-index: 10; 
     }
-    
-    .controls {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      pointer-events: auto;
-    }
-    
-    .benefits-btn {
-      padding: 12px 24px;
-      border-radius: 25px;
-      border: none;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-block;
-      min-width: 140px;
-      text-align: center;
-    }
-    
-    .benefits-btn:hover, .benefits-btn:active {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-    
-    .status-indicator {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 8px 16px;
-      background: rgba(0,0,0,0.7);
-      color: #fff;
-      border-radius: 15px;
-      font-size: 12px;
-      pointer-events: auto;
-    }
-    
-    .marker-found { background: rgba(76, 175, 80, 0.9); }
-    .marker-lost { background: rgba(244, 67, 54, 0.9); }
-    
     #patternMarker {
       display: none;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
-    }
-    
-    .pulsing {
-      animation: pulse 2s infinite;
-    }
-
-    /* Optimización para móviles */
-    @media (max-width: 768px) {
-      .hint {
-        font-size: 12px;
-        bottom: 70px;
-        padding: 8px 14px;
-        max-width: 90%;
-      }
-      
-      .benefits-btn {
-        font-size: 14px;
-        padding: 10px 20px;
-        min-width: 120px;
-      }
-      
-      .status-indicator {
-        font-size: 11px;
-        padding: 6px 12px;
-      }
-    }
-
-    a-scene video, a-scene canvas {
-      object-fit: contain !important;
-    }
-
   </style>
 </head>
 <body>
-  <div class="ui-overlay">
-    <div class="status-indicator" id="status">
-      Iniciando AR...
-    </div>
-    
-    <div class="hint" id="hint">
-      Apunta la cámara a la tarjeta con el marcador
-    </div>
-    
-    <div class="controls">
-      <button class="benefits-btn" onclick="window.location.href='beneficios.html'">
-        Ver Beneficios
-      </button>
-    </div>
-  </div>
+  <!-- Cambia este mensaje para que refleje tu imagen específica -->
+  <div class="hint">Apunta a tu imagen personalizada. Toca un octágono para centrarlo y agrandarlo.</div>
 
+  <!-- Patrón del marcador (debes reemplazar la URL con la de tu imagen) -->
+  <!--<img id="patternMarker" src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Pattern Marker">
+  url de la camare
+  url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.patt" -->
   <img id="patternMarker" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/sdinicio.png" alt="Pattern Marker">
 
-  <a-scene
-    vr-mode-ui="enabled: true"
-    renderer="antialias: true; colorManagement: true; precision: medium; alpha: true;"
-    embedded
-    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;
-    sourceWidth:1280; sourceHeight:720; displayWidth:1280; displayHeight:720;"
-    loading-screen="enabled: true"
-  >
-    <!-- Assets con imágenes -->
+    <a-scene
+      vr-mode-ui="enabled: false"
+      renderer="antialias: true; colorManagement: true; precision: medium;"
+      embedded
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;
+            detectionMode: mono_and_matrix; matrixCodeType: 3x3;
+            smoothing: true; smoothingCount: 5; smoothingTolerance: 0.01; smoothingThreshold: 2"
+    >
+
+    <!-- Añadimos un asset para el marcador de imagen -->
     <a-assets>
-      <img id="img1" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/evos4h.png" crossorigin="anonymous">
-      <img id="img2" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/Apli_SD.png" crossorigin="anonymous">
-      <img id="img3" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/CO.png" crossorigin="anonymous">
-      <img id="img4" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EWM.png" crossorigin="anonymous">
-      <img id="img5" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/FI.png" crossorigin="anonymous">
-      <img id="img6" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/HCM.png" crossorigin="anonymous">
-      <img id="img7" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/MM.png" crossorigin="anonymous">
-      <img id="img8" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PM.png" crossorigin="anonymous">
-      <img id="img9" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PP.png" crossorigin="anonymous">
-      <img id="img10" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/QM.png" crossorigin="anonymous">
-      <img id="img11" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/SD.png" crossorigin="anonymous">
-      <a-asset-item id="eva" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EvaBot.glb"></a-asset-item>
-      <a-asset-item id="walle" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/WalleBot.glb"></a-asset-item>
+      <a-asset-item id="patternMarkerSrc" src="#patternMarker"></a-asset-item>
     </a-assets>
 
-    <!-- Luces optimizadas para vista de tarjeta -->
-    <a-entity light="type: ambient; intensity: 0.7; color: #ffffff"></a-entity>
-    <a-entity light="type: directional; intensity: 1; color: #ffffff" position="1 2 1"></a-entity>
-    <a-entity light="type: point; intensity: 0.4; color: #ffffff" position="0 1.5 0.5"></a-entity>
+    <!-- Luz suave para resaltar los bordes -->
+    <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+    <a-entity light="type: directional; intensity: 0.6" position="1 1 0"></a-entity>
 
-    <!-- Marcador -->
+    <!-- Marcador de imagen personalizado (reemplaza 'hiro' con tu patrón) -->
     <a-marker 
       type="pattern" 
       url="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/pattern-sdinicio.patt"
-      id="marker"
-      smooth="true"
-      smoothCount="10"
-      smoothTolerance="0.01"
-      smoothThreshold="5">
+      raycaster="objects: .clickable"
+      emitevents="true" 
+      cursor="rayOrigin: mouse"
+      id="marker">
       
-      <!-- Contenedor de las imágenes ajustado para vista de tarjeta -->
-      <a-entity id="image-group" position="0 0.5 0" rotation="0 0 0"></a-entity>
-      
-      <!-- Modelo 3D Eva posicionado para vista de tarjeta -->
-      <a-entity 
-        id="eva-entity" 
-        position="-2.5 0.8 0.5" 
-        rotation="0 20 0" 
-        scale="0.6 0.6 0.6"
-        gltf-model="#eva" 
-        animation-mixer="clip: *">
+      <!-- Contenedor de todos los octágonos -->
+      <a-entity id="octagon-group" position="0 0 0">
+        <a-gltf-model 
+          src="#img-wally" 
+          position="2 0.1 0" 
+          scale="0.5 0.5 0.5" 
+          rotation="0 90 0">
+        </a-gltf-model>
+        <a-gltf-model 
+          src="#img-eva" 
+          position="-2 0.1 0" 
+          scale="0.5 0.5 0.5" 
+          rotation="0 90 0">
+        </a-gltf-model>
       </a-entity>
-      
-      <!-- Modelo 3D Wall-E posicionado para vista de tarjeta -->
-      <a-entity 
-        id="walle-entity" 
-        position="2.5 0.8 0.5" 
-        rotation="0 -20 0" 
-        scale="0.6 0.6 0.6"
-        gltf-model="#walle" 
-        animation-mixer="clip: *">
-      </a-entity>
-      
-      <!-- Base decorativa -->
-      <a-cylinder 
-        position="0 0.02 0"
-        radius="3.5" 
-        height="0.04" 
-        color="#e3f2fd" 
-        opacity="0.3">
-      </a-cylinder>
     </a-marker>
 
-    <!-- Cámara -->
-    <a-entity camera="fov: 80" look-controls wasd-controls="enabled: false"></a-entity>
-  </a-scene>
-
+    <!-- Cámara y cursor basado en el puntero (soporta toque/pulsación) -->
+    <a-entity camera look-controls>
+      <a-cursor rayOrigin="mouse"></a-cursor>
+    </a-entity>
+    <!-- imagenes de sap,wally y eva -->
+    </a-scene>
+      <a-assets>
+      <img id="img-sd" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/SD.png" crossorigin="anonymous">
+      <img id="img-pm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PM.png" crossorigin="anonymous">
+      <img id="img-co" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/CO.png" crossorigin="anonymous">
+      <img id="img-fi" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/FI.png" crossorigin="anonymous">
+      <img id="img-ewm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EWM.png" crossorigin="anonymous">
+      <img id="img-pp" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PP.png" crossorigin="anonymous">
+      <img id="img-hcm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/HCM.png" crossorigin="anonymous">
+      <img id="img-mm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/MM.png" crossorigin="anonymous">
+      <img id="img-qm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/QM.png" crossorigin="anonymous">
+      <img id="img-Aplicativos SD" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/Apli_SD.png" crossorigin="anonymous">
+      <a-asset-item id="img-wally" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/WalleBot.glb"></a-asset-item>
+      <a-asset-item id="img-eva" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EvaBot.glb"></a-asset-item>
+      <img id="img-evolution" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/evos4h.png" crossorigin="anonymous">
+    </a-assets>
+    <!-- hacemos que se mueva wally y eva como un la rotacion en un eje -->
+   
   <script>
-    // Configuración optimizada para vista de tarjeta
-    const CONFIG = {
-      RING_RADIUS: 2.8,
-      Y_POSITION: 0.5,
-      IMAGE_SCALE: {x: 1.2, y: 0.6, z: 1},
-      CENTER_SCALE: {x: 2.2, y: 1.1, z: 1},
-      ANIMATION_INTERVAL: 8000, // 8 segundos
-      ROTATION_SPEED: 30000, // 30 segundos por rotación completa
-    };
+    // Utilidad: crear un "octágono" como cilindro de 8 lados, muy delgado
+    function createImage(id, position, src, scale = {x: 1, y: 1, z: 1}) {
+      const img = document.createElement('a-image');
+      img.setAttribute('id', id);
+      img.classList.add('octagon');
+      img.classList.add('clickable'); // Añadimos clase para interacción
+      img.setAttribute('src', src); // Fuente de la imagen
+      img.setAttribute('position', position);
+      img.setAttribute('rotation', '-90 0 0'); // Rotación para que quede plana
+      img.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
+      img.setAttribute('width', 0.6); // Ajusta el ancho de la imagen
+      img.setAttribute('height', 0.4); // Ajusta el alto de la imagen
+      return img;
+    }
 
-    const group = document.getElementById('image-group');
-    const images = [
-      '#img1','#img2','#img3','#img4','#img5',
-      '#img6','#img7','#img8','#img9','#img10', '#img11'
+    const group = document.getElementById('octagon-group');
+    // Octágono central inicial
+    const centerId = 'octagon-center';
+    const center = createImage(centerId, '0 0.1 0', '#img-evolution', {x:1.7, y:1.7, z:1.7})
+    center.dataset.isCenter = 'true';
+    group.appendChild(center);
+    
+
+    const imgSources = [
+      '#img-sd', '#img-pm', '#img-co', '#img-fi', '#img-ewm',
+      '#img-pp', '#img-hcm', '#img-mm', '#img-qm', '#img-Aplicativos SD'
     ];
+ 
+    const R = 1.35; // radio del anillo
+    const Y = 0.1;  // altura
+    const count = 10;
 
-    let currentCenterIndex = 0;
-    let animationTimer;
-    let rotationAnimation;
-
-    // Crear imagen con orientación para tarjeta
-    function createImagePlane(id, src, position, scale = CONFIG.IMAGE_SCALE, isCenter = false) {
-      const e = document.createElement('a-plane');
-      e.setAttribute('id', id);
-      e.setAttribute('material', `src: ${src}; side: double; transparent: true; alphaTest: 0.1`);
-      e.setAttribute('geometry', `width: ${scale.x}; height: ${scale.y}`);
-      e.setAttribute('position', position);
-      e.setAttribute('rotation', '0 0 0'); // Orientación vertical para vista de tarjeta
-      
-      return e;
+    for (let i = 0; i < count; i++) {
+      const theta = (i / count) * Math.PI * 2;
+      const x = R * Math.cos(theta);
+      const z = R * Math.sin(theta);
+      const id = `image-${i+1}`;
+      const img = createImage(id, `${x.toFixed(3)} ${Y} ${z.toFixed(3)}`, imgSources[i], {x: 1, y: 1, z: 1});
+      group.appendChild(img);
     }
 
-    // Calcular posiciones en círculo para vista de tarjeta
-    function calculateRingPositions(count) {
-      const positions = [];
-      const angleStep = (Math.PI * 2) / (count - 1);
-      
-      for (let i = 0; i < count - 1; i++) {
-        const angle = i * angleStep;
-        const x = CONFIG.RING_RADIUS * Math.cos(angle);
-        const z = CONFIG.RING_RADIUS * Math.sin(angle);
-        positions.push({x, y: CONFIG.Y_POSITION, z});
-      }
-      
-      return positions;
-    }
-
-    // Inicializar imágenes
-    function initializeImages() {
-      // Imagen central
-      const center = createImagePlane(
-        'img-center', 
-        images[0], 
-        `0 ${CONFIG.Y_POSITION} 0`, 
-        CONFIG.CENTER_SCALE, 
-        true
-      );
-      center.dataset.index = '0';
-      group.appendChild(center);
-
-      // Imágenes del anillo
-      const ringPositions = calculateRingPositions(images.length);
-      
-      for (let i = 1; i < images.length; i++) {
-        const pos = ringPositions[i - 1];
-        const posStr = `${pos.x.toFixed(2)} ${pos.y} ${pos.z.toFixed(2)}`;
-        
-        const plane = createImagePlane(`img-${i}`, images[i], posStr);
-        plane.dataset.index = i.toString();
-        plane.dataset.ringPosition = posStr;
-        
-        group.appendChild(plane);
-      }
-    }
-
-    // Animación de cambio automático de imagen central
-    function rotateImages() {
-      const currentCenter = group.querySelector('#img-center');
-      const nextIndex = (currentCenterIndex + 1) % images.length;
-      
-      // Encontrar la siguiente imagen
-      const nextImage = group.querySelector(`[data-index="${nextIndex}"]`);
-      if (!nextImage) return;
-
-      // Intercambiar posiciones con animación suave
-      const centerPos = `0 ${CONFIG.Y_POSITION} 0`;
-      const ringPos = nextImage.dataset.ringPosition || `${CONFIG.RING_RADIUS} ${CONFIG.Y_POSITION} 0`;
-
-      // Animar imagen actual al anillo
-      currentCenter.setAttribute('animation', {
-        property: 'position',
-        to: ringPos,
-        dur: 1500,
-        easing: 'easeInOutCubic'
+    // Animar transición suave
+    function animateTo(entity, toPos, toScale, dur = 350) {
+      entity.setAttribute('animation__pos', {
+        property: 'position', to: toPos, dur, easing: 'easeInOutQuad'
       });
-      
-      currentCenter.setAttribute('animation__scale', {
-        property: 'geometry',
-        to: `width: ${CONFIG.IMAGE_SCALE.x}; height: ${CONFIG.IMAGE_SCALE.y}`,
-        dur: 1500,
-        easing: 'easeInOutCubic'
-      });
-
-      // Animar nueva imagen al centro
-      nextImage.setAttribute('animation', {
-        property: 'position',
-        to: centerPos,
-        dur: 1500,
-        easing: 'easeInOutCubic'
-      });
-      
-      nextImage.setAttribute('animation__scale', {
-        property: 'geometry',
-        to: `width: ${CONFIG.CENTER_SCALE.x}; height: ${CONFIG.CENTER_SCALE.y}`,
-        dur: 1500,
-        easing: 'easeInOutCubic'
-      });
-
-      // Actualizar referencias
-      currentCenter.id = `img-ring-${currentCenterIndex}`;
-      currentCenter.dataset.ringPosition = ringPos;
-      
-      nextImage.id = 'img-center';
-      delete nextImage.dataset.ringPosition;
-      
-      currentCenterIndex = nextIndex;
-      
-      updateHint(`Módulo ${getModuleName(nextIndex)}`);
-    }
-
-    // Obtener nombre del módulo
-    function getModuleName(index) {
-      const names = [
-        'SAP HANA Evolution', 'Application Studio', 'Controlling', 'Warehouse Management',
-        'Finance', 'Human Capital Management', 'Materials Management', 'Plant Maintenance',
-        'Production Planning', 'Quality Management', 'Sales & Distribution'
-      ];
-      return names[index] || `Módulo ${index + 1}`;
-    }
-
-    // Animaciones automáticas para modelos 3D
-    function startRobotAnimations() {
-      const eva = document.getElementById('eva-entity');
-      const walle = document.getElementById('walle-entity');
-
-      // Eva: flotación y rotación suave
-      eva.setAttribute('animation__float', {
-        property: 'position',
-        to: '-2.5 1.1 0.5',
-        dur: 4000,
-        direction: 'alternate',
-        repeat: 'indefinite',
-        easing: 'easeInOutSine'
-      });
-      
-      eva.setAttribute('animation__rotate', {
-        property: 'rotation',
-        to: '0 380 0',
-        dur: CONFIG.ROTATION_SPEED,
-        repeat: 'indefinite',
-        easing: 'linear'
-      });
-
-      // Wall-E: movimiento de balanceo y rotación
-      walle.setAttribute('animation__sway', {
-        property: 'position',
-        to: '2.8 0.9 0.3',
-        dur: 3500,
-        direction: 'alternate',
-        repeat: 'indefinite',
-        easing: 'easeInOutSine'
-      });
-      
-      walle.setAttribute('animation__rotate', {
-        property: 'rotation',
-        to: '0 -380 0',
-        dur: CONFIG.ROTATION_SPEED,
-        repeat: 'indefinite',
-        easing: 'linear'
-      });
-
-      // Rotación del grupo de imágenes
-      group.setAttribute('animation__group_rotate', {
-        property: 'rotation',
-        to: '0 360 0',
-        dur: CONFIG.ROTATION_SPEED * 2,
-        repeat: 'indefinite',
-        easing: 'linear'
+      entity.setAttribute('animation__scale', {
+        property: 'scale', to: toScale, dur, easing: 'easeInOutQuad'
       });
     }
 
-    // Actualizar hint
-    function updateHint(message) {
-      const hint = document.getElementById('hint');
-      hint.textContent = message;
-      hint.classList.add('pulsing');
-      
-      setTimeout(() => {
-        hint.classList.remove('pulsing');
-      }, 3000);
+    function swapToCenter(target) {
+      const currentCenter = group.querySelector('[data-is-center="true"]');
+      if (!currentCenter || target === currentCenter) return;
+
+      // Posiciones/escala
+      const targetOriginalPos = target.getAttribute('position');
+      const centerOriginalPos = currentCenter.getAttribute('position');
+
+      const targetOriginalSlot = target.dataset.originalPosition || `${targetOriginalPos.x} ${targetOriginalPos.y} ${targetOriginalPos.z}`;
+      const centerScaleSmall = '1 1 1';
+      const bigScale = '1.7 1.7 1.7';
+
+      // 1) Mover el target al centro y agrandarlo
+      animateTo(target, '0 0.1 0', bigScale);
+      target.dataset.isCenter = 'true';
+
+      // 2) Mover el que estaba al centro hacia el lugar original del target y hacerlo pequeño
+      animateTo(currentCenter, targetOriginalSlot, centerScaleSmall);
+      delete currentCenter.dataset.isCenter;
+
+      // 3) Actualizar data-originalPosition: el que sale al anillo hereda el slot del target
+      currentCenter.dataset.originalPosition = targetOriginalSlot;
     }
 
-    // Event listeners para estados del marcador
-    const marker = document.getElementById('marker');
-    const statusEl = document.getElementById('status');
-
-    marker.addEventListener('markerFound', () => {
-      statusEl.textContent = '✓ Marcador detectado';
-      statusEl.className = 'status-indicator marker-found';
-      updateHint('¡Perfecto! Mantén la tarjeta visible');
-      
-      // Iniciar animaciones automáticas
-      if (!animationTimer) {
-        animationTimer = setInterval(rotateImages, CONFIG.ANIMATION_INTERVAL);
-        startRobotAnimations();
-      }
-    });
-    
-    marker.addEventListener('markerLost', () => {
-      statusEl.textContent = '⚠ Buscando marcador...';
-      statusEl.className = 'status-indicator marker-lost';
-      updateHint('Apunta la cámara a la tarjeta');
-      
-      // Pausar animaciones cuando se pierde el marcador
-      if (animationTimer) {
-        clearInterval(animationTimer);
-        animationTimer = null;
-      }
+    // Interacción: tocar/click sobre cualquier octágono del anillo
+    group.addEventListener('click', (ev) => {
+      const t = ev.target;
+      if (!t.classList || !t.classList.contains('octagon')) return;
+      if (t.dataset.isCenter === 'true') return;
+      swapToCenter(t);
     });
 
-    // Prevenir comportamientos por defecto en móviles
-    document.addEventListener('touchmove', (e) => { 
-      e.preventDefault(); 
-    }, { passive: false });
-
-    document.addEventListener('touchstart', (e) => { 
-      e.preventDefault(); 
-    }, { passive: false });
-
-    // Inicialización
-    initializeImages();
+    // Evitar que el tap arrastre la escena en móviles
+    document.body.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
     
-    setTimeout(() => {
-      statusEl.textContent = 'Listo - Busca la tarjeta';
-      statusEl.className = 'status-indicator';
-      updateHint('Apunta la cámara hacia el marcador en tu tarjeta');
-    }, 1500);
+      const centerPosition = { x: 0, y: 0.1, z: 0 }; 
+      const innerRadius = 0.75;   // Radio cuando están adentro
+      const outerRadius = 2.5;   // Radio cuando se salen afuera
+      const speed = 0.01;
+
+      const eva = document.querySelector('[src="#img-eva"]');
+      const wally = document.querySelector('[src="#img-wally"]');
+
+      let angleEva = 0; 
+      let angleWally = Math.PI; 
+      let evaAfuera = false; 
+      let wallyAfuera = false; 
+      // Función que actualiza las posiciones de Eva y Wally
+      const updatePositions = () => {
+        
+        if (!evaAfuera){
+          const evaX = centerPosition.x + innerRadius * Math.cos(angleEva);
+          const evaZ = centerPosition.z + innerRadius * Math.sin(angleEva);
+          eva.setAttribute('position', `${evaX} ${centerPosition.y} ${evaZ}`);
+          angleEva += speed;
+        } else {
+          const evaX = centerPosition.x + outerRadius * Math.cos(angleEva);
+          const evaZ = centerPosition.z + outerRadius * Math.sin(angleEva);
+          eva.setAttribute('position', `${evaX} ${centerPosition.y} ${evaZ}`);
+          angleEva += 0.03;
+        }
+        
+        // Wally
+        if (!wallyAfuera) {
+          const wallyX = centerPosition.x + innerRadius * Math.cos(angleWally);
+          const wallyZ = centerPosition.z + innerRadius * Math.sin(angleWally);
+          wally.setAttribute('position', `${wallyX} ${centerPosition.y} ${wallyZ}`);
+          angleWally += speed;
+        } else {
+          const wallyX = centerPosition.x + outerRadius * Math.cos(angleWally);
+          const wallyZ = centerPosition.z + outerRadius * Math.sin(angleWally);
+          wally.setAttribute('position', `${wallyX} ${centerPosition.y} ${wallyZ}`);
+          angleWally += 0.03;
+        }
+
+        requestAnimationFrame(updatePositions);
+      };
+
+      // Inicia animación
+      updatePositions();
+      
+      //alternar eva adentro/afuera con un click
+      const posicionEva = () => {
+        evaAfuera = !evaAfuera;
+      };
+      //alternar wally adentro/afuera con un click
+      const posicionWally = () => {
+        wallyAfuera = !wallyAfuera;
+      };
+      eva.addEventListener('click', posicionEva);
+      wally.addEventListener('click', posicionWally);
+
   </script>
-  <script>
-/* 1) Wrap getUserMedia to prefer back camera + sensible resolution */
-(function() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
-  const orig = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
-  navigator.mediaDevices.getUserMedia = (constraints) => {
-    try {
-      if (constraints && constraints.video !== undefined) {
-        const prefer = {
-          facingMode: { ideal: 'environment' },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 }
-        };
-        // merge (preserve existing fields)
-        constraints = Object.assign({}, constraints, {
-          video: Object.assign({}, constraints.video || {}, prefer)
-        });
-      }
-    } catch (e) {
-      console.warn('getUserMedia wrapper error', e);
-    }
-    return orig(constraints);
-  };
-})();
-
-/* 2) After A-Frame / AR.js is ready, tweak the injected video/canvas and force resize */
-document.addEventListener('DOMContentLoaded', () => {
-  const scene = document.querySelector('a-scene');
-  if (!scene) return;
-
-  scene.addEventListener('loaded', () => {
-    // small delay para que AR.js haya creado los elementos
-    setTimeout(() => {
-      try {
-        const arSys = (scene.systems && scene.systems['arjs']) || null;
-        const sourceDom = arSys && arSys.arToolkitSource && arSys.arToolkitSource.domElement;
-        const video = sourceDom && sourceDom.tagName === 'VIDEO' ? sourceDom : document.querySelector('video');
-
-        if (video) {
-          // CSS que evita que el UA "rellene/zoom" el video
-          video.style.objectFit = 'contain';
-          video.style.objectPosition = 'center center';
-          video.style.transform = 'none';
-          video.style.width = '100%';
-          video.style.height = '100%';
-          video.style.maxWidth = '100%';
-          video.style.maxHeight = '100%';
-        }
-
-        // canvas (AR.js/three canvas) - también limpiamos transform
-        const canvas = document.querySelector('canvas');
-        if (canvas) {
-          canvas.style.objectFit = 'contain';
-          canvas.style.transform = 'none';
-          canvas.style.width = '100%';
-          canvas.style.height = '100%';
-        }
-
-        // 3) Si el track soporta zoom, intentar forzarlo a 1 (o al min)
-        try {
-          const stream = video && video.srcObject;
-          const track = stream && stream.getVideoTracks && stream.getVideoTracks()[0];
-          if (track && track.getCapabilities) {
-            const caps = track.getCapabilities();
-            if ('zoom' in caps) {
-              const zoomTo = caps.zoom.min || 1;
-              track.applyConstraints({ advanced: [{ zoom: zoomTo }] })
-                   .then(() => console.log('applied zoom', zoomTo))
-                   .catch(err => console.warn('no se pudo aplicar zoom constraint', err));
-            }
-          }
-        } catch (e) {
-          console.warn('error intentando set zoom', e);
-        }
-
-        // Forzar re-resize en AR.js (si está disponible)
-        if (arSys && arSys.arToolkitSource) {
-          try {
-            if (typeof arSys.arToolkitSource.onResizeElement === 'function') {
-              arSys.arToolkitSource.onResizeElement();
-            }
-            if (typeof arSys.arToolkitSource.copyElementSizeTo === 'function' && arSys.arToolkitContext && arSys.arToolkitContext.canvas) {
-              arSys.arToolkitSource.copyElementSizeTo(arSys.arToolkitContext.canvas);
-            }
-          } catch (e) { console.warn('error forzando resize AR.js', e); }
-        }
-
-        // Fallback visual: reducir un poco la escala del contenido para compensar "zoom" extremo
-        const group = document.getElementById('image-group');
-        if (group) {
-          // Ajusta el valor si quieres más/menos reducción
-          group.setAttribute('scale', '0.6 0.6 0.6');
-        }
-
-      } catch (err) {
-        console.error('post-load AR fixes failed', err);
-      }
-    }, 600); // pequeña espera
-  });
-});
-</script>
-
 </body>
 </html>
