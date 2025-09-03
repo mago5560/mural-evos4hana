@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
  
-  <title>SD Mural</title>
+  <title>Mural SD</title>
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <!-- AR.js para A-Frame -->
@@ -69,13 +69,13 @@
       <a-entity id="octagon-group" position="0 0 0">
         <a-gltf-model 
           src="#img-wally" 
-          position="2 0.1 0" 
+          position="4.7 0.1 0" 
           scale="0.5 0.5 0.5" 
           rotation="0 90 0">
         </a-gltf-model>
         <a-gltf-model 
           src="#img-eva" 
-          position="-2 0.1 0" 
+          position="-4.7 0.1 0" 
           scale="0.5 0.5 0.5" 
           rotation="0 90 0">
         </a-gltf-model>
@@ -107,73 +107,6 @@
    
   <script>
     
-    // Ejecutar cuando la página y la cámara estén listas
-    async function intentarForzarEnfoque() {
-      try {
-        // Busca el elemento video usado por el navegador (AR.js/A-Frame crea uno)
-        const video = document.querySelector('video');
-        if (!video) {
-          console.warn('video no encontrado — intenta más tarde');
-          return;
-        }
-  
-        // Espera a que haya una pista de video activa
-        const stream = video.srcObject || (video.captureStream ? video.captureStream() : null);
-        const tracks = stream ? stream.getVideoTracks() : [];
-        if (!tracks || tracks.length === 0) {
-          console.warn('No hay pistas de video disponibles aún');
-          return;
-        }
-  
-        const track = tracks[0];
-  
-        // Revisa capacidades
-        const caps = track.getCapabilities ? track.getCapabilities() : {};
-        console.log('capabilities', caps);
-  
-        // Intentar modo continuo si está disponible
-        if (caps.focusMode && caps.focusMode.includes('continuous')) {
-          await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
-          console.log('focusMode => continuous aplicado');
-        } else if (caps.focusMode && caps.focusMode.includes('single-shot')) {
-          // fallback: single-shot (se dispara al tocar)
-          await track.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] });
-          console.log('focusMode => single-shot aplicado');
-        } else {
-          console.warn('focusMode no soportado por esta cámara');
-        }
-  
-        // Añadir tap-to-focus: al tocar el video, dispara single-shot si está disponible
-        video.addEventListener('click', async () => {
-          try {
-            if (caps.focusMode && caps.focusMode.includes('single-shot')) {
-              await track.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] });
-              console.log('single-shot focus disparado (tap)');
-            } else {
-              // Alternativa: reenviar constraints para forzar ajuste de exposición/resolución
-              await track.applyConstraints({ width: { ideal: 1280 }, height: { ideal: 720 } });
-              console.log('applyConstraints para forzar reajuste');
-            }
-          } catch (err) {
-            console.warn('Error al intentar tap-to-focus:', err);
-          }
-        });
-  
-      } catch (err) {
-        console.error('Error configurar enfoque:', err);
-      }
-    }
-
-  // Intentar varias veces hasta que el video esté listo
-  let intentos = 0;
-  const intervalo = setInterval(() => {
-    intentos++;
-    if (document.querySelector('video') || intentos > 12) {
-      clearInterval(intervalo);
-      intentarForzarEnfoque();
-    }
-  }, 500);
-
     // Utilidad: crear un "octágono" como cilindro de 8 lados, muy delgado
     function createImage(id, position, src, scale = {x: 1, y: 1, z: 1}) {
       const img = document.createElement('a-image');
@@ -184,15 +117,15 @@
       img.setAttribute('position', position);
       img.setAttribute('rotation', '-90 0 0'); // Rotación para que quede plana
       img.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
-      img.setAttribute('width', 0.6); // Ajusta el ancho de la imagen
-      img.setAttribute('height', 0.4); // Ajusta el alto de la imagen
+      img.setAttribute('width', 1.9); // Ajusta el ancho de la imagen
+      img.setAttribute('height', 1.2); // Ajusta el alto de la imagen
       return img;
     }
 
     const group = document.getElementById('octagon-group');
     // Octágono central inicial
     const centerId = 'octagon-center';
-    const center = createImage(centerId, '0 0.1 0', '#img-evolution', {x:1.7, y:1.7, z:1.7})
+    const center = createImage(centerId, '0 0.12 0', '#img-evolution', {x:2.2, y:2.2, z:2.2})
     center.dataset.isCenter = 'true';
     group.appendChild(center);
     
@@ -202,7 +135,7 @@
       '#img-pp', '#img-hcm', '#img-mm', '#img-qm', '#img-Aplicativos SD'
     ];
  
-    const R = 1.35; // radio del anillo
+    const R = 3.5; // radio del anillo
     const Y = 0.1;  // altura
     const count = 10;
 
@@ -235,7 +168,7 @@
 
       const targetOriginalSlot = target.dataset.originalPosition || `${targetOriginalPos.x} ${targetOriginalPos.y} ${targetOriginalPos.z}`;
       const centerScaleSmall = '1 1 1';
-      const bigScale = '1.7 1.7 1.7';
+      const bigScale = '2.2 2.2 2.2';
 
       // 1) Mover el target al centro y agrandarlo
       animateTo(target, '0 0.1 0', bigScale);
@@ -261,8 +194,8 @@
     document.body.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
     
       const centerPosition = { x: 0, y: 0.1, z: 0 }; 
-      const innerRadius = 0.75;   // Radio cuando están adentro
-      const outerRadius = 2.5;   // Radio cuando se salen afuera
+      const innerRadius = 1.8;   // Radio cuando están adentro
+      const outerRadius = 4.0;   // Radio cuando se salen afuera
       const speed = 0.01;
 
       const eva = document.querySelector('[src="#img-eva"]');
@@ -319,5 +252,4 @@
 
   </script>
 </body>
-
 </html>
