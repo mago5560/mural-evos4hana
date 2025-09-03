@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+
+  <title>AR Beneficios SAP HANA - Cards Flotantes</title>
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- AR.js para A-Frame -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      font-family: system-ui, sans-serif;
+      touch-action: pan-x;
+      -webkit-user-select: none;
+      user-select: none;
+      background: #000;
+    }
+    
+    .ui-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    .hint { 
+      position: fixed; 
+      left: 50%;
+      transform: translateX(-50%);
+      top: 20px; 
+      padding: 8px 16px; 
+      background: rgba(0,0,0,0.85); 
+      color: #fff; 
+      border-radius: 15px;
+      font-size: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      max-width: 85%;
+      text-align: center;
+      pointer-events: auto;
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: auto;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .nav-btn, .home-btn {
+      padding: 12px 20px;
+      border-radius: 25px;
+      border: none;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 50px;
+      height: 44px;
+    }
+    
+    .nav-btn {
+      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+    
+    .home-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      min-width: 100px;
+    }
+    
+    .nav-btn:hover, .home-btn:hover,
+    .nav-btn:active, .home-btn:active {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+    }
+    
+    .home-btn:hover, .home-btn:active {
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .card-indicator {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .dot.active {
+      background: #4CAF50;
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+    }
+    
+    .status-indicator {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 12px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border-radius: 15px;
+      font-size: 11px;
+      pointer-events: auto;
+    }
+    
+    .marker-found { background: rgba(76, 175, 80, 0.9); }
+    .marker-lost { background: rgba(244, 67, 54, 0.9); }
+    
+    .swipe-instruction {
+      position: fixed;
+      bottom: 140px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.8);
+      font-size: 12px;
+      text-align: center;
+      pointer-events: none;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .card-content {
+      animation: slideIn 0.5s ease-out;
+    }
+
+    /* Optimización para móviles */
+    @media (max-width: 768px) {
+      .hint, .status-indicator {
+        font-size: 11px;
+        padding: 6px 12px;
+      }
+      
+      .nav-btn, .home-btn {
+        font-size: 12px;
+        padding: 10px 16px;
+        min-width: 40px;
+        height: 40px;
+      }
+      
+      .controls {
+        gap: 10px;
+      }
+    }
+    a-scene video, a-scene canvas {
+  object-fit: contain !important;
+}
+
+  </style>
+</head>
+<body>
+  <div class="ui-overlay">
+    <div class="hint" id="hint">
+      Beneficios SAP HANA para TI
+    </div>
+    
+    <div class="status-indicator" id="status">
+      Iniciando AR...
+    </div>
+    
+    <div class="swipe-instruction" id="swipeHint">
+      👈 Desliza para navegar 👉
+    </div>
+    
+    <div class="card-indicator" id="cardIndicator">
+      <!-- Los dots se generarán dinámicamente -->
+    </div>
+    
+    <div class="controls">
+      <button class="nav-btn" id="prevBtn" onclick="previousCard()">
+        ‹
+      </button>
+      <button class="nav-btn" id="nextBtn" onclick="nextCard()">
+        ›
+      </button>
+      <a href="index.html" class="home-btn">
+        🏠 Inicio
+      </a>
+    </div>
+  </div>
+
+  <a-scene
+  vr-mode-ui="enabled: true"
+  renderer="antialias: true; colorManagement: true; precision: medium; alpha: true;"
+  embedded
+  arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;
+        sourceWidth:1280; sourceHeight:720; displayWidth:1280; displayHeight:720;"
+  loading-screen="enabled: true"
+>
+
+    <!-- Assets -->
+    <a-assets>
+      <a-mixin id="card-base"
+        geometry="primitive: plane; width: 3; height: 4"
+        material="color: white; transparent: true; alphaTest: 0.1"
+        position="0 2 0"
+        rotation="-15 0 0">
+      </a-mixin>
+      
+      <a-asset-item id="card-font" src="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"></a-asset-item>
+    </a-assets>
+
+    <!-- Luces optimizadas -->
+    <a-entity light="type: ambient; intensity: 0.8; color: #ffffff"></a-entity>
+    <a-entity light="type: directional; intensity: 1.2; color: #ffffff" position="2 4 2"></a-entity>
+    <a-entity light="type: point; intensity: 0.6; color: #4CAF50" position="0 3 1"></a-entity>
+
+    <!-- Marcador -->
+    <a-marker 
+      type="pattern" 
+      url="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/pattern-sdinicio.patt"
+      id="marker"
+      smooth="true"
+      smoothCount="10"
+      smoothTolerance="0.01"
+      smoothThreshold="5">
+      
+      <!-- Contenedor de cards -->
+      <a-entity id="card-container" position="0 0 0">
+        <!-- Los cards se generarán dinámicamente -->
+      </a-entity>
+      
+      <!-- Efectos decorativos -->
+      <a-cylinder 
+        position="0 0.02 0"
+        radius="4" 
+        height="0.05" 
+        color="#e8f5e8" 
+        opacity="0.2"
+        animation="property: rotation; to: 0 360 0; dur: 60000; repeat: indefinite; easing: linear">
+      </a-cylinder>
+      
+      <!-- Partículas flotantes -->
+      <a-entity id="particles" position="0 2 0">
+        <!-- Se generarán dinámicamente -->
+      </a-entity>
+      
+    </a-marker>
+
+    <!-- Cámara -->
+    <a-entity camera="fov: 80" look-controls wasd-controls="enabled: false"></a-entity>
+  </a-scene>
+
+  <script>
+    // Configuración
+    const CONFIG = {
+      CARD_SPACING: 0.1,
+      ANIMATION_DURATION: 800,
+      AUTO_ADVANCE_TIME: 12000,
+      SWIPE_THRESHOLD: 50
+    };
+
+    // Datos de los beneficios
+    const benefitsData = [
+      {
+        title: "Estandarizacion de Procesos",
+        icon: "⚙️",
+        benefits: [
+          "• Unificacion de procedimientos TI",
+          "• Reduccion de complejidad operativa", 
+          "• Mejores prácticas implementadas",
+          "• Consistencia en toda la organizacion"
+        ],
+        color: "#2196F3",
+        gradient: "linear-gradient(135deg, #2196F3, #1976D2)"
+      },
+      {
+        title: "Optimizacion de Recursos",
+        icon: "🚀",
+        benefits: [
+          "• Consolidacion de infraestructura",
+          "• Reduccion de costos operativos",
+          "• Mayor eficiencia energética",
+          "• Optimizacion de licenciamiento"
+        ],
+        color: "#4CAF50",
+        gradient: "linear-gradient(135deg, #4CAF50, #388E3C)"
+      },
+      {
+        title: "Seguridad Avanzada",
+        icon: "🔒",
+        benefits: [
+          "• Controles de acceso robustos",
+          "• Encriptación de datos avanzada",
+          "• Auditoria y compliance mejorados",
+          "• Protección contra amenazas"
+        ],
+        color: "#FF9800",
+        gradient: "linear-gradient(135deg, #FF9800, #F57C00)"
+      },
+      {
+        title: "Analisis en Tiempo Real",
+        icon: "📊",
+        benefits: [
+          "• Monitoreo continuo de sistemas",
+          "• Alertas proactivas de problemas",
+          "• Métricas de rendimiento en vivo",
+          "• Toma de decisiones informada"
+        ],
+        color: "#9C27B0",
+        gradient: "linear-gradient(135deg, #9C27B0, #7B1FA2)"
+      },
+      {
+        title: "Escalabilidad Flexible",
+        icon: "📈",
+        benefits: [
+          "• Crecimiento horizontal y vertical",
+          "• Adaptación a demanda variable",
+          "• Recursos bajo demanda",
+          "• Preparación para el futuro"
+        ],
+        color: "#F44336",
+        gradient: "linear-gradient(135deg, #F44336, #D32F2F)"
+      },
+      {
+        title: "Automatización Inteligente",
+        icon: "🤖",
+        benefits: [
+          "• Procesos automatizados",
+          "• Reducción de errores humanos",
+          "• Liberación de recursos tecnicos",
+          "• Mejora en productividad"
+        ],
+        color: "#00BCD4",
+        gradient: "linear-gradient(135deg, #00BCD4, #0097A7)"
+      }
+    ];
+
+    let currentCardIndex = 0;
+    let isAnimating = false;
+    let autoAdvanceTimer;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // Crear partículas decorativas
+    function createParticles() {
+      const particleContainer = document.getElementById('particles');
+      
+      for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('a-sphere');
+        const x = (Math.random() - 0.5) * 8;
+        const y = Math.random() * 3;
+        const z = (Math.random() - 0.5) * 6;
+        
+        particle.setAttribute('radius', '0.02');
+        particle.setAttribute('color', '#4CAF50');
+        particle.setAttribute('opacity', '0.6');
+        particle.setAttribute('position', `${x} ${y} ${z}`);
+        
+        // Animación de flotación
+        particle.setAttribute('animation', {
+          property: 'position',
+          to: `${x} ${y + 1} ${z}`,
+          dur: 3000 + Math.random() * 2000,
+          direction: 'alternate',
+          repeat: 'indefinite',
+          easing: 'easeInOutSine'
+        });
+        
+        particleContainer.appendChild(particle);
+      }
+    }
+
+    // Crear card HTML con contenido
+    function createCard(data, index) {
+      const card = document.createElement('a-entity');
+      card.setAttribute('id', `card-${index}`);
+      card.setAttribute('position', `0 2 0`);
+      card.setAttribute('rotation', '-10 0 0');
+      card.setAttribute('visible', index === 0);
+      
+      // Fondo del card con gradiente simulado
+      const bg = document.createElement('a-plane');
+      bg.setAttribute('width', '3.2');
+      bg.setAttribute('height', '4.5');
+      bg.setAttribute('color', data.color);
+      bg.setAttribute('opacity', '0.95');
+      bg.setAttribute('position', '0 0 -0.01');
+      bg.setAttribute('material', 'side: double');
+      
+      // Borde decorativo
+      const border = document.createElement('a-plane');
+      border.setAttribute('width', '3.3');
+      border.setAttribute('height', '4.6');
+      border.setAttribute('color', '#ffffff');
+      border.setAttribute('opacity', '0.3');
+      border.setAttribute('position', '0 0 -0.02');
+      
+      // Título
+      const title = document.createElement('a-text');
+      title.setAttribute('value', data.title);
+      title.setAttribute('position', '0 1.8 0.01');
+      title.setAttribute('align', 'center');
+      title.setAttribute('width', '8');
+      title.setAttribute('color', '#ffffff');
+      title.setAttribute('font', 'roboto');
+      title.setAttribute('wrap-count', '25');
+      
+      // Icono
+      const icon = document.createElement('a-text');
+      icon.setAttribute('value', data.icon);
+      icon.setAttribute('position', '0 1.3 0.01');
+      icon.setAttribute('align', 'center');
+      icon.setAttribute('width', '12');
+      
+      // Beneficios
+      let benefitsY = 0.8;
+      data.benefits.forEach((benefit, i) => {
+        const benefitText = document.createElement('a-text');
+        benefitText.setAttribute('value', benefit);
+        benefitText.setAttribute('position', `0 ${benefitsY - (i * 0.35)} 0.01`);
+        benefitText.setAttribute('align', 'center');
+        benefitText.setAttribute('width', '5');
+        benefitText.setAttribute('color', '#ffffff');
+        benefitText.setAttribute('wrap-count', '35');
+        card.appendChild(benefitText);
+      });
+      
+      // Número de card
+      const cardNumber = document.createElement('a-text');
+      cardNumber.setAttribute('value', `${index + 1}/${benefitsData.length}`);
+      cardNumber.setAttribute('position', '0 -1.8 0.01');
+      cardNumber.setAttribute('align', 'center');
+      cardNumber.setAttribute('width', '4');
+      cardNumber.setAttribute('color', '#ffffff');
+      cardNumber.setAttribute('opacity', '0.7');
+      
+      // Ensamblar card
+      card.appendChild(border);
+      card.appendChild(bg);
+      card.appendChild(title);
+      card.appendChild(icon);
+      card.appendChild(cardNumber);
+      
+      // Animación de entrada
+      card.setAttribute('animation__scale', {
+        property: 'scale',
+        from: '0.8 0.8 0.8',
+        to: '1 1 1',
+        dur: 600,
+        easing: 'easeOutBack'
+      });
+      
+      // Animación de flotación
+      card.setAttribute('animation__float', {
+        property: 'position',
+        to: '0 2.2 0',
+        dur: 4000,
+        direction: 'alternate',
+        repeat: 'indefinite',
+        easing: 'easeInOutSine'
+      });
+      
+      return card;
+    }
+
+    // Inicializar cards
+    function initializeCards() {
+      const container = document.getElementById('card-container');
+      
+      benefitsData.forEach((data, index) => {
+        const card = createCard(data, index);
+        container.appendChild(card);
+      });
+      
+      updateCardIndicators();
+    }
+
+    // Actualizar indicadores de posición
+    function updateCardIndicators() {
+      const indicator = document.getElementById('cardIndicator');
+      indicator.innerHTML = '';
+      
+      benefitsData.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = `dot ${index === currentCardIndex ? 'active' : ''}`;
+        dot.onclick = () => goToCard(index);
+        indicator.appendChild(dot);
+      });
+    }
+
+    // Mostrar card específico
+    function showCard(index) {
+      if (isAnimating || index === currentCardIndex) return;
+      
+      isAnimating = true;
+      const oldCard = document.getElementById(`card-${currentCardIndex}`);
+      const newCard = document.getElementById(`card-${index}`);
+      
+      if (!newCard || !oldCard) {
+        isAnimating = false;
+        return;
+      }
+      
+      // Animación de salida
+      oldCard.setAttribute('animation__fadeout', {
+        property: 'opacity',
+        to: '0',
+        dur: CONFIG.ANIMATION_DURATION / 2,
+        easing: 'easeInCubic'
+      });
+      
+      oldCard.setAttribute('animation__slideout', {
+        property: 'position',
+        to: index > currentCardIndex ? '-2 2 0' : '2 2 0',
+        dur: CONFIG.ANIMATION_DURATION / 2,
+        easing: 'easeInCubic'
+      });
+      
+      setTimeout(() => {
+        oldCard.setAttribute('visible', false);
+        newCard.setAttribute('visible', true);
+        
+        // Posición inicial para animación de entrada
+        newCard.setAttribute('position', index > currentCardIndex ? '2 2 0' : '-2 2 0');
+        newCard.setAttribute('opacity', '0');
+        
+        // Animación de entrada
+        newCard.setAttribute('animation__fadein', {
+          property: 'opacity',
+          to: '1',
+          dur: CONFIG.ANIMATION_DURATION / 2,
+          easing: 'easeOutCubic'
+        });
+        
+        newCard.setAttribute('animation__slidein', {
+          property: 'position',
+          to: '0 2 0',
+          dur: CONFIG.ANIMATION_DURATION / 2,
+          easing: 'easeOutCubic'
+        });
+        
+        currentCardIndex = index;
+        updateCardIndicators();
+        updateHint(benefitsData[index].title);
+        
+        setTimeout(() => {
+          isAnimating = false;
+        }, CONFIG.ANIMATION_DURATION / 2);
+        
+      }, CONFIG.ANIMATION_DURATION / 2);
+    }
+
+    // Navegación
+    function nextCard() {
+      const nextIndex = (currentCardIndex + 1) % benefitsData.length;
+      showCard(nextIndex);
+    }
+
+    function previousCard() {
+      const prevIndex = currentCardIndex === 0 ? benefitsData.length - 1 : currentCardIndex - 1;
+      showCard(prevIndex);
+    }
+
+    function goToCard(index) {
+      showCard(index);
+    }
+
+    // Auto-advance
+    function startAutoAdvance() {
+      if (autoAdvanceTimer) clearInterval(autoAdvanceTimer);
+      autoAdvanceTimer = setInterval(() => {
+        nextCard();
+      }, CONFIG.AUTO_ADVANCE_TIME);
+    }
+
+    function pauseAutoAdvance() {
+      if (autoAdvanceTimer) {
+        clearInterval(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+      }
+    }
+
+    // Gestos táctiles
+    function handleTouchStart(e) {
+      touchStartX = e.touches[0].clientX;
+    }
+
+    function handleTouchEnd(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      handleSwipe();
+    }
+
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+      
+      if (Math.abs(swipeDistance) > CONFIG.SWIPE_THRESHOLD) {
+        if (swipeDistance > 0) {
+          previousCard();
+        } else {
+          nextCard();
+        }
+        
+        // Reiniciar auto-advance después de interacción
+        startAutoAdvance();
+      }
+    }
+
+    // Actualizar hint
+    function updateHint(message) {
+      const hint = document.getElementById('hint');
+      hint.textContent = message;
+    }
+
+    // Event listeners para el marcador
+    const marker = document.getElementById('marker');
+    const statusEl = document.getElementById('status');
+    const swipeHint = document.getElementById('swipeHint');
+
+    marker.addEventListener('markerFound', () => {
+      statusEl.textContent = '✓ Marcador detectado';
+      statusEl.className = 'status-indicator marker-found';
+      swipeHint.style.display = 'block';
+      updateHint(benefitsData[currentCardIndex].title);
+      startAutoAdvance();
+    });
+    
+    marker.addEventListener('markerLost', () => {
+      statusEl.textContent = '⚠ Buscando marcador...';
+      statusEl.className = 'status-indicator marker-lost';
+      swipeHint.style.display = 'none';
+      updateHint('Apunta la cámara a la tarjeta');
+      pauseAutoAdvance();
+    });
+
+    // Event listeners para gestos
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    // Prevenir comportamientos por defecto
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // Pausar auto-advance en interacción
+    document.addEventListener('click', () => {
+      pauseAutoAdvance();
+      setTimeout(startAutoAdvance, 5000);
+    });
+
+    // Inicialización con ajustes para móviles
+    setTimeout(() => {
+      initializeCards();
+      createParticles();
+      
+      // Ajustar resolución de cámara para móviles
+      if (CONFIG.MOBILE_DETECTION) {
+        const scene = document.querySelector('a-scene');
+        if (scene && scene.systems && scene.systems.arjs) {
+          scene.systems.arjs.sourceWidth = 480;
+          scene.systems.arjs.sourceHeight = 640;
+        }
+      }
+      
+      statusEl.textContent = 'Listo - Busca la tarjeta';
+      statusEl.className = 'status-indicator';
+      updateHint('Beneficios SAP HANA para TI');
+    }, 1500);
+    
+    // Ajustar viewport en móviles
+    function adjustMobileViewport() {
+      if (CONFIG.MOBILE_DETECTION) {
+        const metaViewport = document.querySelector('meta[name=viewport]');
+        if (metaViewport) {
+          metaViewport.setAttribute('content', 
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
+          );
+        }
+        
+        // Ajustar altura de la página
+        document.documentElement.style.height = '100vh';
+        document.body.style.height = '100vh';
+      }
+    }
+    
+    // Ejecutar ajustes de móvil
+    adjustMobileViewport();
+    
+    // Reajustar en cambio de orientación
+    window.addEventListener('orientationchange', () => {
+      setTimeout(adjustMobileViewport, 500);
+    });
+  </script>
+  <script>
+/* 1) Wrap getUserMedia to prefer back camera + sensible resolution */
+(function() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  const orig = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+  navigator.mediaDevices.getUserMedia = (constraints) => {
+    try {
+      if (constraints && constraints.video !== undefined) {
+        const prefer = {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 }
+        };
+        // merge (preserve existing fields)
+        constraints = Object.assign({}, constraints, {
+          video: Object.assign({}, constraints.video || {}, prefer)
+        });
+      }
+    } catch (e) {
+      console.warn('getUserMedia wrapper error', e);
+    }
+    return orig(constraints);
+  };
+})();
+
+/* 2) After A-Frame / AR.js is ready, tweak the injected video/canvas and force resize */
+document.addEventListener('DOMContentLoaded', () => {
+  const scene = document.querySelector('a-scene');
+  if (!scene) return;
+
+  scene.addEventListener('loaded', () => {
+    // small delay para que AR.js haya creado los elementos
+    setTimeout(() => {
+      try {
+        const arSys = (scene.systems && scene.systems['arjs']) || null;
+        const sourceDom = arSys && arSys.arToolkitSource && arSys.arToolkitSource.domElement;
+        const video = sourceDom && sourceDom.tagName === 'VIDEO' ? sourceDom : document.querySelector('video');
+
+        if (video) {
+          // CSS que evita que el UA "rellene/zoom" el video
+          video.style.objectFit = 'contain';
+          video.style.objectPosition = 'center center';
+          video.style.transform = 'none';
+          video.style.width = '100%';
+          video.style.height = '100%';
+          video.style.maxWidth = '100%';
+          video.style.maxHeight = '100%';
+        }
+
+        // canvas (AR.js/three canvas) - también limpiamos transform
+        const canvas = document.querySelector('canvas');
+        if (canvas) {
+          canvas.style.objectFit = 'contain';
+          canvas.style.transform = 'none';
+          canvas.style.width = '100%';
+          canvas.style.height = '100%';
+        }
+
+        // 3) Si el track soporta zoom, intentar forzarlo a 1 (o al min)
+        try {
+          const stream = video && video.srcObject;
+          const track = stream && stream.getVideoTracks && stream.getVideoTracks()[0];
+          if (track && track.getCapabilities) {
+            const caps = track.getCapabilities();
+            if ('zoom' in caps) {
+              const zoomTo = caps.zoom.min || 1;
+              track.applyConstraints({ advanced: [{ zoom: zoomTo }] })
+                   .then(() => console.log('applied zoom', zoomTo))
+                   .catch(err => console.warn('no se pudo aplicar zoom constraint', err));
+            }
+          }
+        } catch (e) {
+          console.warn('error intentando set zoom', e);
+        }
+
+        // Forzar re-resize en AR.js (si está disponible)
+        if (arSys && arSys.arToolkitSource) {
+          try {
+            if (typeof arSys.arToolkitSource.onResizeElement === 'function') {
+              arSys.arToolkitSource.onResizeElement();
+            }
+            if (typeof arSys.arToolkitSource.copyElementSizeTo === 'function' && arSys.arToolkitContext && arSys.arToolkitContext.canvas) {
+              arSys.arToolkitSource.copyElementSizeTo(arSys.arToolkitContext.canvas);
+            }
+          } catch (e) { console.warn('error forzando resize AR.js', e); }
+        }
+
+        // Fallback visual: reducir un poco la escala del contenido para compensar "zoom" extremo
+        const group = document.getElementById('image-group');
+        if (group) {
+          // Ajusta el valor si quieres más/menos reducción
+          group.setAttribute('scale', '0.6 0.6 0.6');
+        }
+
+      } catch (err) {
+        console.error('post-load AR fixes failed', err);
+      }
+    }, 600); // pequeña espera
+  });
+});
+</script>
+
+</body>
+</html>
