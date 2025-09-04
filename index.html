@@ -252,7 +252,13 @@
         });
 
         // Inicializar animación de Eva y Wally después de un breve retraso
-        setTimeout(initializeBotsAnimation, 500);
+        // NOTA: Solo inicializamos la animación original si no hay contenido permanente
+        setTimeout(() => {
+          const permanentContent = document.getElementById('permanent-content');
+          if (!permanentContent) {
+            initializeBotsAnimationOriginal();
+          }
+        }, 500);
         
       }, 100);
     });
@@ -329,7 +335,6 @@
     // Evitar que el tap arrastre la escena en móviles
     document.body.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
 
-    
   </script>
 </body>
 </html>
