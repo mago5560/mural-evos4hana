@@ -26,7 +26,6 @@
     #patternMarker {
       display: none;
     }
-    /* Indicador de estado del marcador */
     #markerStatus {
       position: fixed;
       top: 10px;
@@ -38,7 +37,6 @@
       border-radius: 5px;
       z-index: 10;
       font-size: 12px;
-      transition: all 0.3s ease;
     }
     #markerStatus.active {
       background: rgba(0,128,0,0.8);
@@ -46,248 +44,219 @@
   </style>
 </head>
 <body>
-  <!-- Cambia este mensaje para que refleje tu imagen específica -->
-  <div class="hint">Apunta a tu imagen personalizada. Toca un octágono para centrarlo y agrandarlo.</div>
-  
-  <!-- Indicador de estado del marcador -->
+  <div class="hint">Apunta a tu imagen personalizada. Una vez detectado, los objetos permanecerán visibles.</div>
   <div id="markerStatus">Buscando marcador...</div>
 
-  <!-- Patrón del marcador (debes reemplazar la URL con la de tu imagen) -->
   <img id="patternMarker" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/sdinicio.png" alt="Pattern Marker">
 
-  <!-- Componente personalizado para marcador persistente -->
+  <a-scene
+    vr-mode-ui="enabled: false"
+    renderer="antialias: true; colorManagement: true; precision: medium;"
+    embedded
+    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;
+          detectionMode: mono_and_matrix; matrixCodeType: 3x3;
+          smoothing: true; smoothingCount: 5; smoothingTolerance: 0.01; smoothingThreshold: 2"
+  >
+
+  <a-assets>
+    <a-asset-item id="patternMarkerSrc" src="#patternMarker"></a-asset-item>
+    <img id="img-sd" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/SD.png" crossorigin="anonymous">
+    <img id="img-pm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PM.png" crossorigin="anonymous">
+    <img id="img-co" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/CO.png" crossorigin="anonymous">
+    <img id="img-fi" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/FI.png" crossorigin="anonymous">
+    <img id="img-ewm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EWM.png" crossorigin="anonymous">
+    <img id="img-pp" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PP.png" crossorigin="anonymous">
+    <img id="img-hcm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/HCM.png" crossorigin="anonymous">
+    <img id="img-mm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/MM.png" crossorigin="anonymous">
+    <img id="img-qm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/QM.png" crossorigin="anonymous">
+    <img id="img-Aplicativos SD" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/Apli_SD.png" crossorigin="anonymous">
+    <a-asset-item id="img-wally" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/WalleBot.glb"></a-asset-item>
+    <a-asset-item id="img-eva" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EvaBot.glb"></a-asset-item>
+    <img id="img-evolution" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/evos4h.png" crossorigin="anonymous">
+  </a-assets>
+
+  <!-- Luz -->
+  <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+  <a-entity light="type: directional; intensity: 0.6" position="1 1 0"></a-entity>
+
+  <!-- Marcador SOLO para detección -->
+  <a-marker 
+    type="pattern" 
+    url="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/pattern-sdinicio.patt"
+    id="marker">
+    <!-- Contenido vacío - solo detección -->
+  </a-marker>
+
+  <!-- Contenido PERMANENTE fuera del marcador -->
+  <a-entity id="permanent-content" visible="false">
+    <!-- Eva y Wally -->
+    <a-gltf-model 
+      id="eva-permanent"
+      src="#img-eva" 
+      position="-4.7 0.1 0" 
+      scale="0.5 0.5 0.5" 
+      rotation="0 90 0">
+    </a-gltf-model>
+    
+    <a-gltf-model 
+      id="wally-permanent"
+      src="#img-wally" 
+      position="4.7 0.1 0" 
+      scale="0.5 0.5 0.5" 
+      rotation="0 90 0">
+    </a-gltf-model>
+  </a-entity>
+
+  <a-entity camera look-controls>
+    <a-cursor rayOrigin="mouse"></a-cursor>
+  </a-entity>
+  </a-scene>
+ 
   <script>
-    AFRAME.registerComponent('persistent-marker', {
-      init: function() {
-        this.markerFound = false;
-        this.statusElement = document.getElementById('markerStatus');
+    let isActivated = false;
+    const marker = document.getElementById('marker');
+    const permanentContent = document.getElementById('permanent-content');
+    const statusElement = document.getElementById('markerStatus');
+
+    // Escuchar detección del marcador
+    marker.addEventListener('markerFound', function() {
+      if (!isActivated) {
+        console.log('Marcador detectado - Activando contenido permanente');
         
-        this.el.addEventListener('markerFound', () => {
-          console.log('¡Marcador detectado y activado permanentemente!');
-          this.markerFound = true;
-          
-          // Mantener visible permanentemente
-          this.el.setAttribute('visible', true);
-          
-          // Actualizar indicador visual
-          if (this.statusElement) {
-            this.statusElement.textContent = '¡Marcador activo permanentemente!';
-            this.statusElement.classList.add('active');
-          }
-          
-          // Opcional: Vibrar en dispositivos móviles si está disponible
-          if (navigator.vibrate) {
-            navigator.vibrate(200);
-          }
-        });
+        // Obtener posición y rotación del marcador
+        const markerPos = marker.object3D.position.clone();
+        const markerRot = marker.object3D.rotation.clone();
+        const markerScale = marker.object3D.scale.clone();
         
-        this.el.addEventListener('markerLost', () => {
-          console.log('Marcador perdido, pero manteniendo objetos visibles');
-          // Si ya se encontró una vez, mantener visible
-          if (this.markerFound) {
-            this.el.setAttribute('visible', true);
-          }
-        });
+        // Aplicar transformaciones al contenido permanente
+        permanentContent.object3D.position.copy(markerPos);
+        permanentContent.object3D.rotation.copy(markerRot);
+        permanentContent.object3D.scale.copy(markerScale);
+        
+        // Hacer visible el contenido permanente
+        permanentContent.setAttribute('visible', true);
+        
+        // Actualizar estado
+        isActivated = true;
+        statusElement.textContent = '¡Contenido activo permanentemente!';
+        statusElement.classList.add('active');
+        
+        // Vibración
+        if (navigator.vibrate) {
+          navigator.vibrate(200);
+        }
+        
+        // Crear los octágonos después de activar
+        createOctagons();
+        
+        // Inicializar animaciones
+        setTimeout(initializeAnimations, 200);
       }
     });
-  </script>
 
-    <a-scene
-      vr-mode-ui="enabled: false"
-      renderer="antialias: true; colorManagement: true; precision: medium;"
-      embedded
-      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;
-            detectionMode: mono_and_matrix; matrixCodeType: 3x3;
-            smoothing: true; smoothingCount: 5; smoothingTolerance: 0.01; smoothingThreshold: 2"
-    >
+    // Crear octágonos
+    function createOctagons() {
+      function createImage(id, position, src, scale = {x: 1, y: 1, z: 1}) {
+        const img = document.createElement('a-image');
+        img.setAttribute('id', id);
+        img.classList.add('octagon');
+        img.classList.add('clickable');
+        img.setAttribute('src', src);
+        img.setAttribute('position', position);
+        img.setAttribute('rotation', '-90 0 0');
+        img.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
+        img.setAttribute('width', 1.9);
+        img.setAttribute('height', 1.2);
+        return img;
+      }
 
-    <!-- Añadimos un asset para el marcador de imagen -->
-    <a-assets>
-      <a-asset-item id="patternMarkerSrc" src="#patternMarker"></a-asset-item>
-      <!-- imagenes de sap,wally y eva -->
-      <img id="img-sd" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/SD.png" crossorigin="anonymous">
-      <img id="img-pm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PM.png" crossorigin="anonymous">
-      <img id="img-co" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/CO.png" crossorigin="anonymous">
-      <img id="img-fi" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/FI.png" crossorigin="anonymous">
-      <img id="img-ewm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EWM.png" crossorigin="anonymous">
-      <img id="img-pp" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PP.png" crossorigin="anonymous">
-      <img id="img-hcm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/HCM.png" crossorigin="anonymous">
-      <img id="img-mm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/MM.png" crossorigin="anonymous">
-      <img id="img-qm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/QM.png" crossorigin="anonymous">
-      <img id="img-Aplicativos SD" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/Apli_SD.png" crossorigin="anonymous">
-      <a-asset-item id="img-wally" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/WalleBot.glb"></a-asset-item>
-      <a-asset-item id="img-eva" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EvaBot.glb"></a-asset-item>
-      <img id="img-evolution" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/evos4h.png" crossorigin="anonymous">
-    </a-assets>
+      // Octágono central
+      const center = createImage('octagon-center', '0 0.12 0', '#img-evolution', {x:2.2, y:2.2, z:2.2});
+      center.dataset.isCenter = 'true';
+      permanentContent.appendChild(center);
 
-    <!-- Luz suave para resaltar los bordes -->
-    <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-    <a-entity light="type: directional; intensity: 0.6" position="1 1 0"></a-entity>
+      // Octágonos del anillo
+      const imgSources = [
+        '#img-sd', '#img-pm', '#img-co', '#img-fi', '#img-ewm',
+        '#img-pp', '#img-hcm', '#img-mm', '#img-qm', '#img-Aplicativos SD'
+      ];
 
-    <!-- Marcador de imagen personalizado con funcionalidad persistente -->
-    <a-marker 
-      type="pattern" 
-      url="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/pattern-sdinicio.patt"
-      raycaster="objects: .clickable"
-      emitevents="true" 
-      cursor="rayOrigin: mouse"
-      persistent-marker
-      id="marker">
-      
-      <!-- Contenedor de todos los octágonos -->
-      <a-entity id="octagon-group" position="0 0 0">
-        <a-gltf-model 
-          src="#img-wally" 
-          position="4.7 0.1 0" 
-          scale="0.5 0.5 0.5" 
-          rotation="0 90 0">
-        </a-gltf-model>
-        <a-gltf-model 
-          src="#img-eva" 
-          position="-4.7 0.1 0" 
-          scale="0.5 0.5 0.5" 
-          rotation="0 90 0">
-        </a-gltf-model>
-      </a-entity>
-    </a-marker>
+      const R = 3.5;
+      const Y = 0.1;
+      const count = 10;
 
-    <!-- Cámara y cursor basado en el puntero (soporta toque/pulsación) -->
-    <a-entity camera look-controls>
-      <a-cursor rayOrigin="mouse"></a-cursor>
-    </a-entity>
-    </a-scene>
-   
-  <script>
-    
-    // Utilidad: crear un "octágono" como cilindro de 8 lados, muy delgado
-    function createImage(id, position, src, scale = {x: 1, y: 1, z: 1}) {
-      const img = document.createElement('a-image');
-      img.setAttribute('id', id);
-      img.classList.add('octagon');
-      img.classList.add('clickable'); // Añadimos clase para interacción
-      img.setAttribute('src', src); // Fuente de la imagen
-      img.setAttribute('position', position);
-      img.setAttribute('rotation', '-90 0 0'); // Rotación para que quede plana
-      img.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
-      img.setAttribute('width', 1.9); // Ajusta el ancho de la imagen
-      img.setAttribute('height', 1.2); // Ajusta el alto de la imagen
-      return img;
+      for (let i = 0; i < count; i++) {
+        const theta = (i / count) * Math.PI * 2;
+        const x = R * Math.cos(theta);
+        const z = R * Math.sin(theta);
+        const id = `image-${i+1}`;
+        const img = createImage(id, `${x.toFixed(3)} ${Y} ${z.toFixed(3)}`, imgSources[i], {x: 1, y: 1, z: 1});
+        permanentContent.appendChild(img);
+      }
+
+      // Configurar interacciones
+      setupInteractions();
     }
 
-    // Esperar a que la escena se cargue antes de agregar elementos
-    document.addEventListener('DOMContentLoaded', function() {
-      // Pequeña pausa para asegurar que todo esté cargado
-      setTimeout(() => {
-        const group = document.getElementById('octagon-group');
-        if (!group) {
-          console.error('No se encontró octagon-group');
-          return;
-        }
-
-        // Octágono central inicial
-        const centerId = 'octagon-center';
-        const center = createImage(centerId, '0 0.12 0', '#img-evolution', {x:2.2, y:2.2, z:2.2})
-        center.dataset.isCenter = 'true';
-        group.appendChild(center);
-        
-
-        const imgSources = [
-          '#img-sd', '#img-pm', '#img-co', '#img-fi', '#img-ewm',
-          '#img-pp', '#img-hcm', '#img-mm', '#img-qm', '#img-Aplicativos SD'
-        ];
-     
-        const R = 3.5; // radio del anillo
-        const Y = 0.1;  // altura
-        const count = 10;
-
-        for (let i = 0; i < count; i++) {
-          const theta = (i / count) * Math.PI * 2;
-          const x = R * Math.cos(theta);
-          const z = R * Math.sin(theta);
-          const id = `image-${i+1}`;
-          const img = createImage(id, `${x.toFixed(3)} ${Y} ${z.toFixed(3)}`, imgSources[i], {x: 1, y: 1, z: 1});
-          group.appendChild(img);
-        }
-
-        // Animar transición suave
-        function animateTo(entity, toPos, toScale, dur = 350) {
-          entity.setAttribute('animation__pos', {
-            property: 'position', to: toPos, dur, easing: 'easeInOutQuad'
-          });
-          entity.setAttribute('animation__scale', {
-            property: 'scale', to: toScale, dur, easing: 'easeInOutQuad'
-          });
-        }
-
-        function swapToCenter(target) {
-          const currentCenter = group.querySelector('[data-is-center="true"]');
-          if (!currentCenter || target === currentCenter) return;
-
-          // Posiciones/escala
-          const targetOriginalPos = target.getAttribute('position');
-          const centerOriginalPos = currentCenter.getAttribute('position');
-
-          const targetOriginalSlot = target.dataset.originalPosition || `${targetOriginalPos.x} ${targetOriginalPos.y} ${targetOriginalPos.z}`;
-          const centerScaleSmall = '1 1 1';
-          const bigScale = '2.2 2.2 2.2';
-
-          // 1) Mover el target al centro y agrandarlo
-          animateTo(target, '0 0.1 0', bigScale);
-          target.dataset.isCenter = 'true';
-
-          // 2) Mover el que estaba al centro hacia el lugar original del target y hacerlo pequeño
-          animateTo(currentCenter, targetOriginalSlot, centerScaleSmall);
-          delete currentCenter.dataset.isCenter;
-
-          // 3) Actualizar data-originalPosition: el que sale al anillo hereda el slot del target
-          currentCenter.dataset.originalPosition = targetOriginalSlot;
-        }
-
-        // Interacción: tocar/click sobre cualquier octágono del anillo
-        group.addEventListener('click', (ev) => {
-          const t = ev.target;
-          if (!t.classList || !t.classList.contains('octagon')) return;
-          if (t.dataset.isCenter === 'true') return;
-          swapToCenter(t);
+    // Configurar interacciones de octágonos
+    function setupInteractions() {
+      function animateTo(entity, toPos, toScale, dur = 350) {
+        entity.setAttribute('animation__pos', {
+          property: 'position', to: toPos, dur, easing: 'easeInOutQuad'
         });
+        entity.setAttribute('animation__scale', {
+          property: 'scale', to: toScale, dur, easing: 'easeInOutQuad'
+        });
+      }
 
-        // Inicializar animación de Eva y Wally después de un breve retraso
-        // NOTA: Solo inicializamos la animación original si no hay contenido permanente
-        setTimeout(() => {
-          const permanentContent = document.getElementById('permanent-content');
-          if (!permanentContent) {
-            initializeBotsAnimationOriginal();
-          }
-        }, 500);
-        
-      }, 100);
-    });
+      function swapToCenter(target) {
+        const currentCenter = permanentContent.querySelector('[data-is-center="true"]');
+        if (!currentCenter || target === currentCenter) return;
 
-    // Función separada para inicializar la animación de los bots
-    function initializeBotsAnimation() {
-      const eva = document.querySelector('[src="#img-eva"]');
-      const wally = document.querySelector('[src="#img-wally"]');
+        const targetOriginalPos = target.getAttribute('position');
+        const targetOriginalSlot = target.dataset.originalPosition || `${targetOriginalPos.x} ${targetOriginalPos.y} ${targetOriginalPos.z}`;
+        const centerScaleSmall = '1 1 1';
+        const bigScale = '2.2 2.2 2.2';
+
+        animateTo(target, '0 0.1 0', bigScale);
+        target.dataset.isCenter = 'true';
+
+        animateTo(currentCenter, targetOriginalSlot, centerScaleSmall);
+        delete currentCenter.dataset.isCenter;
+
+        currentCenter.dataset.originalPosition = targetOriginalSlot;
+      }
+
+      permanentContent.addEventListener('click', (ev) => {
+        const t = ev.target;
+        if (!t.classList || !t.classList.contains('octagon')) return;
+        if (t.dataset.isCenter === 'true') return;
+        swapToCenter(t);
+      });
+    }
+
+    // Inicializar animaciones de Eva y Wally
+    function initializeAnimations() {
+      const eva = document.getElementById('eva-permanent');
+      const wally = document.getElementById('wally-permanent');
       
       if (!eva || !wally) {
-        console.warn('Eva o Wally no encontrados, reintentando...');
-        setTimeout(initializeBotsAnimation, 500);
+        console.warn('Eva o Wally no encontrados');
         return;
       }
 
-      const centerPosition = { x: 0, y: 0.1, z: 0 }; 
-      const innerRadius = 1.8;   // Radio cuando están adentro
-      const outerRadius = 4.0;   // Radio cuando se salen afuera
+      const centerPosition = { x: 0, y: 0.1, z: 0 };
+      const innerRadius = 1.8;
+      const outerRadius = 4.0;
       const speed = 0.01;
 
-      let angleEva = 0; 
-      let angleWally = Math.PI; 
-      let evaAfuera = false; 
-      let wallyAfuera = false; 
+      let angleEva = 0;
+      let angleWally = Math.PI;
+      let evaAfuera = false;
+      let wallyAfuera = false;
 
-      // Función que actualiza las posiciones de Eva y Wally
-      const updatePositions = () => {
-        
-        if (!evaAfuera){
+      function updatePositions() {
+        if (!evaAfuera) {
           const evaX = centerPosition.x + innerRadius * Math.cos(angleEva);
           const evaZ = centerPosition.z + innerRadius * Math.sin(angleEva);
           eva.setAttribute('position', `${evaX} ${centerPosition.y} ${evaZ}`);
@@ -298,8 +267,7 @@
           eva.setAttribute('position', `${evaX} ${centerPosition.y} ${evaZ}`);
           angleEva += 0.03;
         }
-        
-        // Wally
+
         if (!wallyAfuera) {
           const wallyX = centerPosition.x + innerRadius * Math.cos(angleWally);
           const wallyZ = centerPosition.z + innerRadius * Math.sin(angleWally);
@@ -313,28 +281,16 @@
         }
 
         requestAnimationFrame(updatePositions);
-      };
+      }
 
-      // Funciones para alternar posiciones
-      const posicionEva = () => {
-        evaAfuera = !evaAfuera;
-      };
-      
-      const posicionWally = () => {
-        wallyAfuera = !wallyAfuera;
-      };
+      eva.addEventListener('click', () => { evaAfuera = !evaAfuera; });
+      wally.addEventListener('click', () => { wallyAfuera = !wallyAfuera; });
 
-      // Event listeners para los clics
-      eva.addEventListener('click', posicionEva);
-      wally.addEventListener('click', posicionWally);
-
-      // Inicia animación
       updatePositions();
     }
 
-    // Evitar que el tap arrastre la escena en móviles
+    // Prevenir drag en móviles
     document.body.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
-
   </script>
 </body>
 </html>
