@@ -31,12 +31,51 @@
 <body>
   <!-- Cambia este mensaje para que refleje tu imagen específica -->
   <div class="hint">Apunta a tu imagen personalizada. Toca un octágono para centrarlo y agrandarlo.</div>
+ <!-- Indicador de estado del marcador -->
+  <div id="markerStatus">Buscando marcador...</div>
 
   <!-- Patrón del marcador (debes reemplazar la URL con la de tu imagen) -->
   <!--<img id="patternMarker" src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Pattern Marker">
   url de la camare
   url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.patt" -->
   <img id="patternMarker" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/sdinicio.png" alt="Pattern Marker">
+
+  <!-- Componente personalizado para marcador persistente -->
+  <script>
+    AFRAME.registerComponent('persistent-marker', {
+      init: function() {
+        this.markerFound = false;
+        this.statusElement = document.getElementById('markerStatus');
+        
+        this.el.addEventListener('markerFound', () => {
+          console.log('¡Marcador detectado y activado permanentemente!');
+          this.markerFound = true;
+          
+          // Mantener visible permanentemente
+          this.el.setAttribute('visible', true);
+          
+          // Actualizar indicador visual
+          if (this.statusElement) {
+            this.statusElement.textContent = '¡Marcador activo permanentemente!';
+            this.statusElement.classList.add('active');
+          }
+          
+          // Opcional: Vibrar en dispositivos móviles si está disponible
+          if (navigator.vibrate) {
+            navigator.vibrate(200);
+          }
+        });
+        
+        this.el.addEventListener('markerLost', () => {
+          console.log('Marcador perdido, pero manteniendo objetos visibles');
+          // Si ya se encontró una vez, mantener visible
+          if (this.markerFound) {
+            this.el.setAttribute('visible', true);
+          }
+        });
+      }
+    });
+  </script>
 
     <a-scene
       vr-mode-ui="enabled: false"
@@ -250,6 +289,9 @@
       eva.addEventListener('click', posicionEva);
       wally.addEventListener('click', posicionWally);
 
+ // Evitar que el tap arrastre la escena en móviles
+    document.body.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+    
   </script>
 </body>
 </html>
