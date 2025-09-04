@@ -26,18 +26,33 @@
     #patternMarker {
       display: none;
     }
+    /* Indicador de estado del marcador */
+    #markerStatus {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 8px 12px;
+      font-family: system-ui, sans-serif;
+      background: rgba(255,165,0,0.8);
+      color: white;
+      border-radius: 5px;
+      z-index: 10;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+    #markerStatus.active {
+      background: rgba(0,128,0,0.8);
+    }
   </style>
 </head>
 <body>
   <!-- Cambia este mensaje para que refleje tu imagen específica -->
   <div class="hint">Apunta a tu imagen personalizada. Toca un octágono para centrarlo y agrandarlo.</div>
- <!-- Indicador de estado del marcador -->
+  
+  <!-- Indicador de estado del marcador -->
   <div id="markerStatus">Buscando marcador...</div>
 
   <!-- Patrón del marcador (debes reemplazar la URL con la de tu imagen) -->
-  <!--<img id="patternMarker" src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Pattern Marker">
-  url de la camare
-  url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.patt" -->
   <img id="patternMarker" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/sdinicio.png" alt="Pattern Marker">
 
   <!-- Componente personalizado para marcador persistente -->
@@ -89,19 +104,34 @@
     <!-- Añadimos un asset para el marcador de imagen -->
     <a-assets>
       <a-asset-item id="patternMarkerSrc" src="#patternMarker"></a-asset-item>
+      <!-- imagenes de sap,wally y eva -->
+      <img id="img-sd" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/SD.png" crossorigin="anonymous">
+      <img id="img-pm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PM.png" crossorigin="anonymous">
+      <img id="img-co" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/CO.png" crossorigin="anonymous">
+      <img id="img-fi" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/FI.png" crossorigin="anonymous">
+      <img id="img-ewm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EWM.png" crossorigin="anonymous">
+      <img id="img-pp" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PP.png" crossorigin="anonymous">
+      <img id="img-hcm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/HCM.png" crossorigin="anonymous">
+      <img id="img-mm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/MM.png" crossorigin="anonymous">
+      <img id="img-qm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/QM.png" crossorigin="anonymous">
+      <img id="img-Aplicativos SD" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/Apli_SD.png" crossorigin="anonymous">
+      <a-asset-item id="img-wally" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/WalleBot.glb"></a-asset-item>
+      <a-asset-item id="img-eva" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EvaBot.glb"></a-asset-item>
+      <img id="img-evolution" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/evos4h.png" crossorigin="anonymous">
     </a-assets>
 
     <!-- Luz suave para resaltar los bordes -->
     <a-entity light="type: ambient; intensity: 0.8"></a-entity>
     <a-entity light="type: directional; intensity: 0.6" position="1 1 0"></a-entity>
 
-    <!-- Marcador de imagen personalizado (reemplaza 'hiro' con tu patrón) -->
+    <!-- Marcador de imagen personalizado con funcionalidad persistente -->
     <a-marker 
       type="pattern" 
       url="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/pattern-sdinicio.patt"
       raycaster="objects: .clickable"
       emitevents="true" 
       cursor="rayOrigin: mouse"
+      persistent-marker
       id="marker">
       
       <!-- Contenedor de todos los octágonos -->
@@ -125,24 +155,7 @@
     <a-entity camera look-controls>
       <a-cursor rayOrigin="mouse"></a-cursor>
     </a-entity>
-    <!-- imagenes de sap,wally y eva -->
     </a-scene>
-      <a-assets>
-      <img id="img-sd" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/SD.png" crossorigin="anonymous">
-      <img id="img-pm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PM.png" crossorigin="anonymous">
-      <img id="img-co" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/CO.png" crossorigin="anonymous">
-      <img id="img-fi" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/FI.png" crossorigin="anonymous">
-      <img id="img-ewm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EWM.png" crossorigin="anonymous">
-      <img id="img-pp" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/PP.png" crossorigin="anonymous">
-      <img id="img-hcm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/HCM.png" crossorigin="anonymous">
-      <img id="img-mm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/MM.png" crossorigin="anonymous">
-      <img id="img-qm" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/QM.png" crossorigin="anonymous">
-      <img id="img-Aplicativos SD" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/Apli_SD.png" crossorigin="anonymous">
-      <a-asset-item id="img-wally" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/WalleBot.glb"></a-asset-item>
-      <a-asset-item id="img-eva" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/EvaBot.glb"></a-asset-item>
-      <img id="img-evolution" src="https://raw.githubusercontent.com/mago5560/mural-evos4hana/main/asset/evos4h.png" crossorigin="anonymous">
-    </a-assets>
-    <!-- hacemos que se mueva wally y eva como un la rotacion en un eje -->
    
   <script>
     
@@ -161,89 +174,110 @@
       return img;
     }
 
-    const group = document.getElementById('octagon-group');
-    // Octágono central inicial
-    const centerId = 'octagon-center';
-    const center = createImage(centerId, '0 0.12 0', '#img-evolution', {x:2.2, y:2.2, z:2.2})
-    center.dataset.isCenter = 'true';
-    group.appendChild(center);
-    
+    // Esperar a que la escena se cargue antes de agregar elementos
+    document.addEventListener('DOMContentLoaded', function() {
+      // Pequeña pausa para asegurar que todo esté cargado
+      setTimeout(() => {
+        const group = document.getElementById('octagon-group');
+        if (!group) {
+          console.error('No se encontró octagon-group');
+          return;
+        }
 
-    const imgSources = [
-      '#img-sd', '#img-pm', '#img-co', '#img-fi', '#img-ewm',
-      '#img-pp', '#img-hcm', '#img-mm', '#img-qm', '#img-Aplicativos SD'
-    ];
- 
-    const R = 3.5; // radio del anillo
-    const Y = 0.1;  // altura
-    const count = 10;
+        // Octágono central inicial
+        const centerId = 'octagon-center';
+        const center = createImage(centerId, '0 0.12 0', '#img-evolution', {x:2.2, y:2.2, z:2.2})
+        center.dataset.isCenter = 'true';
+        group.appendChild(center);
+        
 
-    for (let i = 0; i < count; i++) {
-      const theta = (i / count) * Math.PI * 2;
-      const x = R * Math.cos(theta);
-      const z = R * Math.sin(theta);
-      const id = `image-${i+1}`;
-      const img = createImage(id, `${x.toFixed(3)} ${Y} ${z.toFixed(3)}`, imgSources[i], {x: 1, y: 1, z: 1});
-      group.appendChild(img);
-    }
+        const imgSources = [
+          '#img-sd', '#img-pm', '#img-co', '#img-fi', '#img-ewm',
+          '#img-pp', '#img-hcm', '#img-mm', '#img-qm', '#img-Aplicativos SD'
+        ];
+     
+        const R = 3.5; // radio del anillo
+        const Y = 0.1;  // altura
+        const count = 10;
 
-    // Animar transición suave
-    function animateTo(entity, toPos, toScale, dur = 350) {
-      entity.setAttribute('animation__pos', {
-        property: 'position', to: toPos, dur, easing: 'easeInOutQuad'
-      });
-      entity.setAttribute('animation__scale', {
-        property: 'scale', to: toScale, dur, easing: 'easeInOutQuad'
-      });
-    }
+        for (let i = 0; i < count; i++) {
+          const theta = (i / count) * Math.PI * 2;
+          const x = R * Math.cos(theta);
+          const z = R * Math.sin(theta);
+          const id = `image-${i+1}`;
+          const img = createImage(id, `${x.toFixed(3)} ${Y} ${z.toFixed(3)}`, imgSources[i], {x: 1, y: 1, z: 1});
+          group.appendChild(img);
+        }
 
-    function swapToCenter(target) {
-      const currentCenter = group.querySelector('[data-is-center="true"]');
-      if (!currentCenter || target === currentCenter) return;
+        // Animar transición suave
+        function animateTo(entity, toPos, toScale, dur = 350) {
+          entity.setAttribute('animation__pos', {
+            property: 'position', to: toPos, dur, easing: 'easeInOutQuad'
+          });
+          entity.setAttribute('animation__scale', {
+            property: 'scale', to: toScale, dur, easing: 'easeInOutQuad'
+          });
+        }
 
-      // Posiciones/escala
-      const targetOriginalPos = target.getAttribute('position');
-      const centerOriginalPos = currentCenter.getAttribute('position');
+        function swapToCenter(target) {
+          const currentCenter = group.querySelector('[data-is-center="true"]');
+          if (!currentCenter || target === currentCenter) return;
 
-      const targetOriginalSlot = target.dataset.originalPosition || `${targetOriginalPos.x} ${targetOriginalPos.y} ${targetOriginalPos.z}`;
-      const centerScaleSmall = '1 1 1';
-      const bigScale = '2.2 2.2 2.2';
+          // Posiciones/escala
+          const targetOriginalPos = target.getAttribute('position');
+          const centerOriginalPos = currentCenter.getAttribute('position');
 
-      // 1) Mover el target al centro y agrandarlo
-      animateTo(target, '0 0.1 0', bigScale);
-      target.dataset.isCenter = 'true';
+          const targetOriginalSlot = target.dataset.originalPosition || `${targetOriginalPos.x} ${targetOriginalPos.y} ${targetOriginalPos.z}`;
+          const centerScaleSmall = '1 1 1';
+          const bigScale = '2.2 2.2 2.2';
 
-      // 2) Mover el que estaba al centro hacia el lugar original del target y hacerlo pequeño
-      animateTo(currentCenter, targetOriginalSlot, centerScaleSmall);
-      delete currentCenter.dataset.isCenter;
+          // 1) Mover el target al centro y agrandarlo
+          animateTo(target, '0 0.1 0', bigScale);
+          target.dataset.isCenter = 'true';
 
-      // 3) Actualizar data-originalPosition: el que sale al anillo hereda el slot del target
-      currentCenter.dataset.originalPosition = targetOriginalSlot;
-    }
+          // 2) Mover el que estaba al centro hacia el lugar original del target y hacerlo pequeño
+          animateTo(currentCenter, targetOriginalSlot, centerScaleSmall);
+          delete currentCenter.dataset.isCenter;
 
-    // Interacción: tocar/click sobre cualquier octágono del anillo
-    group.addEventListener('click', (ev) => {
-      const t = ev.target;
-      if (!t.classList || !t.classList.contains('octagon')) return;
-      if (t.dataset.isCenter === 'true') return;
-      swapToCenter(t);
+          // 3) Actualizar data-originalPosition: el que sale al anillo hereda el slot del target
+          currentCenter.dataset.originalPosition = targetOriginalSlot;
+        }
+
+        // Interacción: tocar/click sobre cualquier octágono del anillo
+        group.addEventListener('click', (ev) => {
+          const t = ev.target;
+          if (!t.classList || !t.classList.contains('octagon')) return;
+          if (t.dataset.isCenter === 'true') return;
+          swapToCenter(t);
+        });
+
+        // Inicializar animación de Eva y Wally después de un breve retraso
+        setTimeout(initializeBotsAnimation, 500);
+        
+      }, 100);
     });
 
-    // Evitar que el tap arrastre la escena en móviles
-    document.body.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
-    
+    // Función separada para inicializar la animación de los bots
+    function initializeBotsAnimation() {
+      const eva = document.querySelector('[src="#img-eva"]');
+      const wally = document.querySelector('[src="#img-wally"]');
+      
+      if (!eva || !wally) {
+        console.warn('Eva o Wally no encontrados, reintentando...');
+        setTimeout(initializeBotsAnimation, 500);
+        return;
+      }
+
       const centerPosition = { x: 0, y: 0.1, z: 0 }; 
       const innerRadius = 1.8;   // Radio cuando están adentro
       const outerRadius = 4.0;   // Radio cuando se salen afuera
       const speed = 0.01;
 
-      const eva = document.querySelector('[src="#img-eva"]');
-      const wally = document.querySelector('[src="#img-wally"]');
-
       let angleEva = 0; 
       let angleWally = Math.PI; 
       let evaAfuera = false; 
       let wallyAfuera = false; 
+
       // Función que actualiza las posiciones de Eva y Wally
       const updatePositions = () => {
         
@@ -275,23 +309,26 @@
         requestAnimationFrame(updatePositions);
       };
 
-      // Inicia animación
-      updatePositions();
-      
-      //alternar eva adentro/afuera con un click
+      // Funciones para alternar posiciones
       const posicionEva = () => {
         evaAfuera = !evaAfuera;
       };
-      //alternar wally adentro/afuera con un click
+      
       const posicionWally = () => {
         wallyAfuera = !wallyAfuera;
       };
+
+      // Event listeners para los clics
       eva.addEventListener('click', posicionEva);
       wally.addEventListener('click', posicionWally);
 
- // Evitar que el tap arrastre la escena en móviles
+      // Inicia animación
+      updatePositions();
+    }
+
+    // Evitar que el tap arrastre la escena en móviles
     document.body.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
-    
+
   </script>
 </body>
 </html>
